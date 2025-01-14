@@ -1,0 +1,64 @@
+{% extends 'inventario/base.html' %}
+
+{% load static %}
+
+{% block contenido %}
+    <h1>Aca va el listado de productos</h1>
+    <div class="input-group mb-12">
+        <form class="input-group mb-3" action="{% url 'buscar_producto' %}" method="GET">
+            {% csrf_token %}
+            <input type="text" name="q" class="form-control" placeholder="buscador de productos por nombre">
+            <button class="btn btn-success" type="submit">Buscar</button>
+        </form>
+    </div>
+    <table class="table table-striped table-hover table-responsive-sm table-warning">
+        <th>Nombre</th>
+        <th>Descripcion</th>
+        <th>Peso Neto</th>
+        <th>F.Ingreso</th>
+        <th>F.Venc.</th>
+        <th>Cant.</th>
+        <th>Precio Unit.</th>
+        <th>Activo</th>
+        <th>Marca</th>
+        <th>Proveedor</th>
+        <th>Categoria</th>
+        <th>Acción</th>
+
+        {% for producto in productos %}
+            <tr>
+                <td>{{ producto.nombre }}</td>
+                <td>{{ producto.descripcion }}</td>
+                <td>{{ producto.peso_neto }}g</td>
+                <td>{{ producto.fecha_de_registro | date:"d/m/y" }}</td>
+                <td>{{ producto.fecha_de_vencimiento | date:"d/m/y" }}</td>
+                <td>{{ producto.cantidad_stock }}</td>
+                <td>{{ producto.precio_unitario }}</td>
+                <td>
+                    {% if producto.activo %}
+                        SI
+                    {% else %}
+                        NO
+                    {% endif %}
+                </td>
+                <td>{{ producto.marca }}</td>
+                <td>{{ producto.proveedor }}</td>
+                <td>{{ producto.categoria }}</td>
+                <td>
+                    {% if perms.app.change_producto %}
+                        <a href="#" onclick="saludar()" class="btn btn-info btn-sm">Modificar</a>
+                    {% endif %}
+                    &nbsp;
+                    {% if perms.app.delete_producto %}
+                        <a href="#" onclick="despedida()" class="btn btn-danger btn-sm">Eliminar</a>
+                    {% endif %}
+                </td>
+
+            </tr>
+        {% endfor %}
+    </table>
+    {% include 'inventario/paginator.html' %}
+    {% block js %}
+        <script src="{% static 'inventario/js/listado.js' %}"></script>
+    {% endblock %}
+{% endblock %}

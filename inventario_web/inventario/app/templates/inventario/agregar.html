@@ -1,0 +1,29 @@
+{% extends 'inventario/base.html' %} 
+{% block contenido %}
+
+{% load crispy_forms_tags %}
+
+{% load static %}
+<link rel="stylesheet" href="{% static 'inventario/css/agregar.css' %}">
+
+<div class="row">
+  <div class="col-9 col-md-9 centrar">
+    <div class="card">
+      <div class="card-body">
+        <h2>Nuevo Producto</h2>
+        <hr>
+        <form class="formulario-personalizado" action="" method="post" enctype="multipart/form-data">
+          {% csrf_token %} 
+          {{ form | crispy }}
+          <div class="d-flex justify-content-end">
+            <input type="reset" value="Cancelar" class="btn btn-secondary" />
+            &nbsp;
+            <input type="submit" value="Guardar" class="btn btn-primary" />
+          </div>
+        </form>
+        {{ mensaje }}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

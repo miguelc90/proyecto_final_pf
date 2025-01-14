@@ -1,0 +1,14 @@
+.row{
+    background-color: #d73452;
+    height: 120vh;
+}
+.centrar{
+    margin-left: 13%;
+    margin-top: 10px;
+    
+}
+
+.formulario-personalizado { 
+    height: 100vh;
+    overflow-y: auto;
+}

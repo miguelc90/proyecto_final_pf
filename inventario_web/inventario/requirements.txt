@@ -1,0 +1,4 @@
+mysqlclient
+django-admin-interface
+django-crispy-forms
+crispy-bootstrap4
