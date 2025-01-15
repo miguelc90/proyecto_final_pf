@@ -1,5 +1,5 @@
 from django.http import Http404
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import logout
 from .models import Producto
 from .forms import ProductoForm
@@ -14,11 +14,11 @@ def home(request):
 
 @login_required
 def listado(request):
-    productos = Producto.objects.all()
+    productos = Producto.objects.all().order_by('nombre')
     page = request.GET.get('page', 1)
 
     try:
-        paginator = Paginator(productos, 8)
+        paginator = Paginator(productos, 7)
         productos = paginator.page(page)
     except:
         raise Http404
@@ -43,6 +43,7 @@ def buscar_producto(request):
         productos = Producto.objects.filter(nombre__icontains=query) 
     else: 
         productos = Producto.objects.all()
+        
 
     return render(request, 'inventario/listado.html', {'productos': productos})
 
@@ -60,3 +61,27 @@ def agregar_producto(request):
         else:
             data['form'] = formulario
     return render(request, 'inventario/agregar.html', data)
+
+def modificar_producto(request, id):
+
+    producto = get_object_or_404(Producto, id=id)
+
+    data = {
+        'form': ProductoForm(instance=producto)
+    }
+
+    if request.method == 'POST':
+        formulario = ProductoForm(data=request.POST, instance=producto, files=request.FILES)
+        if formulario.is_valid():
+            formulario.save()
+            messages.success(request, 'producto modificado correctamente')
+            return redirect(to='listado')
+        data['form'] = formulario
+
+    return render(request, 'inventario/modificar.html', data)
+
+def eliminar_producto(request, id):
+    producto = get_object_or_404(Producto, id=id)
+    producto.delete()
+    messages.success(request, 'el producto se eliminó correctamente')
+    return redirect(to='listado')

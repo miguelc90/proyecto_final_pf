@@ -1,5 +1,5 @@
 #menu{
-    background-color: #f0eeee;
+    background-color: #006169;
 }
 
 nav {
@@ -21,4 +21,12 @@ nav > ul > li {
 nav > ul > li > a {
     color:rgb(219, 32, 32);
     text-decoration: none;
+}
+
+.list-group-item{
+    background-color: rgb(221, 214, 218);
+}
+
+.bg-contenido{
+    background-color: #007546;
 }
