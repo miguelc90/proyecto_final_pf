@@ -34,7 +34,7 @@
     <div class="container-fluid">
         <div class="row">
             <div id="menu" class="col-2">
-                <h3 class="dash">DASHBOARD</h3>
+                <h3 class="dash">STOCKMARKET</h3>
                 <ul class="list-group">
                     <li class="list-group-item">
                         <a class="nav-link" href="{% url 'home' %}">Dashboard</a>
@@ -46,7 +46,7 @@
                         <a class="nav-link" href="{% url 'agregar_producto' %}">Agregar Productos</a>
                     </li>
                     <li class="list-group-item">
-                        <a class="nav-link" href="#">Proveedores</a>
+                        <a class="nav-link" href="{% url 'proveedores' %}">Proveedores</a>
                     </li>
                     <li class="list-group-item">
                         <a class="nav-link" href="#">Reportes</a>
@@ -61,7 +61,7 @@
                         <a class="nav-link" href="#">Pedidos</a>
                     </li>
                     <li class="list-group-item">
-                        <a class="nav-link" href="#">Proveedores</a>
+                        <a class="nav-link" href="{% url 'sesion_usuario' %}">Logs</a>
                     </li>
                     <li class="list-group-item">
                         <a class="nav-link" href="#">Proveedores</a>

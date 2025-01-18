@@ -1,0 +1,32 @@
+#menu{
+    background-color: #006169;
+}
+
+nav {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    height: 100%;
+}
+
+nav > ul {
+    margin-right: 20px;
+}
+
+nav > ul > li {
+    display: inline;
+    margin-left: 10px;
+}
+
+nav > ul > li > a {
+    color:rgb(219, 32, 32);
+    text-decoration: none;
+}
+
+.list-group-item{
+    background-color: rgb(221, 214, 218);
+}
+
+.bg-contenido{
+    background-color: #007546;
+}

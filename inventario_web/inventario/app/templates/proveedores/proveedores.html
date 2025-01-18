@@ -1,0 +1,30 @@
+{% extends 'inventario/base.html' %} 
+
+{% block contenido %}
+
+<h1>Aca van los proveedores</h1> 
+
+<div class="d-flex flex-wrap">
+  {% for proveedor in proveedores %}
+  <div class="card" style="width: 20rem;">
+    {% if proveedor.imagen_proveedor %} 
+      <img src="{{ proveedor.imagen_proveedor.url }}" alt="{{ proveedor.nombre }}" class="card-img-top" style="height: 200px; object-fit: cover;"> 
+    {% else %} 
+      <p>No hay imagen disponible</p> 
+    {% endif %}
+      <div class="card-body">
+        <h5 class="card-title">{{ proveedor.nombre }}</h5>
+        <p class="card-text">{{ proveedor.descripcion | title}}</p>
+        {% if proveedor.nombre == "SRB Distribuidora" %}
+          <a href="{% url 'bebidas' %}" class="btn btn-primary">Ir a la tienda</a>
+        {% elif proveedor.nombre == "Congelados Food" %}
+          <a href="{% url 'congelados' %}" class="btn btn-primary">Ir a la tienda</a>
+        {% else %}
+          <a href="{% url 'alimentos' %}" class="btn btn-primary">Ir a la tienda</a>
+        {% endif %}
+      </div>
+  </div>
+{% endfor %}
+</div>
+
+{% endblock %}

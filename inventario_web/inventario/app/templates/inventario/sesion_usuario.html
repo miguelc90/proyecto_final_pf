@@ -1,0 +1,19 @@
+{% extends 'inventario/base.html' %} 
+{% block contenido %}
+
+<h1>Sesiones de Usuarios</h1> 
+<table class="table table-striped table-hover table-responsive-sm table-warning"> 
+    <tr> 
+        <th>Nombre de usuario</th> 
+        <th>Entrada</th> 
+        <th>Salida</th> 
+    </tr> 
+    {% for sesion in sesiones %} 
+    <tr> 
+        <td>{{ sesion.user.username }}</td> 
+        <td>{{ sesion.login_time }}</td> 
+        <td>{{ sesion.logout_time }}</td> 
+    </tr> {% endfor %}
+
+
+{% endblock %}

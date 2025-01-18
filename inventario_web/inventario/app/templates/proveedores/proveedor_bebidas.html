@@ -1,0 +1,39 @@
+{% extends 'inventario/base.html' %} 
+
+{% block contenido %}
+
+{% load humanize %}
+<h1>SRB Distribuidora</h1>
+
+<table class="table table-striped table-hover table-responsive-sm table-warning">
+    <thead class="table-dark">
+        <th>Nombre</th>
+        <th>Descripción</th>
+        <th>F.Venc</th>
+        <th>Código Bulto</th>
+        <th>Unidades</th>
+        <th>Precio Bulto</th>
+        <th>Marca</th>
+        <th>Acción</th>
+    </thead>
+    
+    {% for bebida in bebidas %}
+        {% if bebida.proveedor.nombre == "SRB Distribuidora" %}
+            <tr>
+                <td>{{ bebida.nombre }}</td>
+                <td>{{ bebida.descripcion }}</td>
+                <td>{{ bebida.fecha_vencimiento | date:"d/m/y" }}</td>
+                <td>{{ bebida.codigo_bulto }}</td>
+                <td>{{ bebida.cantidad_bulto }}</td>
+                <td>{{ bebida.precio_bulto }}</td>
+                <td>{{ bebida.marca }}</td>
+                <td>
+                    <a href="" class="btn btn-success btn-sm">+</a>
+                    <a href="" class="btn btn-danger btn-sm">-</a>
+                </td>
+            </tr>
+        {% endif %}
+    {% endfor %}
+</table>
+
+{% endblock %}

@@ -1,5 +1,10 @@
 from django.db import models
+from django.contrib.auth.models import User
+import random
 
+#funciones
+def generar_codigo_aleatorio():
+    return random.randint(1000000000, 2147483647)
 # Create your models here.
 
 class Marca(models.Model):
@@ -10,9 +15,25 @@ class Marca(models.Model):
     
 class Proveedor(models.Model):
     nombre = models.CharField(max_length=50)
+    descripcion = models.CharField(max_length=50, default="proveedor")
+    imagen_proveedor = models.ImageField(upload_to='img/proveedores/', null=True, blank=True)
 
     def __str__(self):
         return self.nombre
+
+class ProductoProveedor(models.Model):
+    nombre = models.CharField(max_length=50)
+    descripcion = models.CharField(max_length=50)
+    fecha_vencimiento = models.DateField()
+    codigo_bulto = models.IntegerField(default=generar_codigo_aleatorio)
+    cantidad_bulto = models.IntegerField()
+    precio_bulto = models.DecimalField(max_digits=10, decimal_places=2)
+    marca = models.ForeignKey(Marca, on_delete=models.CASCADE)
+    proveedor = models.ForeignKey(Proveedor, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.nombre
+
 
 class Categoria(models.Model):
     nombre = models.CharField(max_length=50)
@@ -36,3 +57,10 @@ class Producto(models.Model):
 
     def __str__(self):
         return self.nombre
+
+class UserSession(models.Model): 
+    user = models.ForeignKey(User, on_delete=models.CASCADE) 
+    login_time = models.DateTimeField() 
+    logout_time = models.DateTimeField(null=True, blank=True) 
+    def __str__(self): 
+        return f"{self.user.username} - {self.login_time} to {self.logout_time}"

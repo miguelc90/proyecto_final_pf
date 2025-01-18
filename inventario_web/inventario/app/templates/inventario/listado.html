@@ -35,7 +35,7 @@
                 <td>{{ producto.fecha_de_registro | date:"d/m/y" }}</td>
                 <td>{{ producto.fecha_de_vencimiento | date:"d/m/y" }}</td>
                 <td>{{ producto.cantidad_stock }}</td>
-                <td>{{ producto.precio_unitario }}</td>
+                <td>${{ producto.precio_unitario }}</td>
                 <td>
                     {% if producto.activo %}
                         SI
