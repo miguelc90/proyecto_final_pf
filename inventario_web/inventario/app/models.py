@@ -64,3 +64,13 @@ class UserSession(models.Model):
     logout_time = models.DateTimeField(null=True, blank=True) 
     def __str__(self): 
         return f"{self.user.username} - {self.login_time} to {self.logout_time}"
+    
+#carrito de compras
+
+class Carrito(models.Model):
+    productos = models.ManyToManyField(ProductoProveedor, through='CarritoProducto')
+
+class CarritoProducto(models.Model):
+    carrito = models.ForeignKey(Carrito, on_delete=models.CASCADE)
+    producto = models.ForeignKey(ProductoProveedor, on_delete=models.CASCADE)
+    cantidad = models.IntegerField()

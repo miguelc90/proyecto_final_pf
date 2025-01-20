@@ -12,20 +12,40 @@ from django.contrib.auth.decorators import login_required, permission_required
 def home(request):
     return render(request, "inventario/home.html")
 
+def paginado_inventario(request, items, items_por_pagina=7):
+    page = request.GET.get('page', 1) 
+    paginator = Paginator(items, items_por_pagina) 
+    try: 
+        items = paginator.page(page) 
+    except PageNotAnInteger: 
+        items = paginator.page(1) 
+    except EmptyPage:
+        items = paginator.page(paginator.num_pages)
+    return items
+
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+
+def paginado_proveedores(request, queryset, items_por_pagina=10):
+    page = request.GET.get('page', 1)
+    paginator = Paginator(queryset, items_por_pagina)
+
+    try:
+        pagina = paginator.page(page)
+    except PageNotAnInteger:
+        pagina = paginator.page(1)
+    except EmptyPage:
+        pagina = paginator.page(paginator.num_pages)
+    return pagina
+
+
 @login_required
 def listado(request): 
     productos = Producto.objects.all().order_by('nombre') 
-    page = request.GET.get('page', 1) 
-    paginator = Paginator(productos, 7) 
-    try: 
-        productos = paginator.page(page) 
-    except PageNotAnInteger: 
-            productos = paginator.page(1) 
-    except EmptyPage: 
-            productos = paginator.page(paginator.num_pages) 
+    productos_paginados = paginado_inventario(request, productos) 
+
     data = { 
-        'productos': productos, 
-        'paginator': paginator 
+        'productos': productos_paginados, 
+        'paginator': productos_paginados.paginator
     } 
     return render(request, "inventario/listado.html", data)
 
@@ -46,19 +66,11 @@ def buscar_producto(request):
         productos = Producto.objects.filter(nombre__icontains=query) 
     else: productos = Producto.objects.all().order_by('nombre')
 
-    page = request.GET.get('page', 1) 
-    paginator = Paginator(productos, 7)
-
-    try: 
-        productos = paginator.page(page) 
-    except PageNotAnInteger: 
-        productos = paginator.page(1) 
-    except EmptyPage: 
-        productos = paginator.page(paginator.num_pages)
+    productos_paginados = paginado_inventario(request, productos)
  
     data = { 
-        'productos': productos, 
-        'paginator': paginator, 
+        'productos': productos_paginados, 
+        'paginator': productos_paginados.paginator, 
         'query': query, 
     } 
     return render(request, "inventario/listado.html", data)
@@ -112,18 +124,31 @@ def lista_proveedores(request):
     return render(request, 'proveedores/proveedores.html', data)
 
 def proveedor_bebidas(request):
-    bebidas = ProductoProveedor.objects.all()
+    bebidas = ProductoProveedor.objects.filter(proveedor__nombre="SRB Distribuidora").order_by('nombre')
+    bebidas_paginadas = paginado_proveedores(request, bebidas)
     data = {
-        'bebidas':bebidas
+        'bebidas':bebidas_paginadas,
+        'paginator':bebidas_paginadas.paginator,
+        'contexto':'bebidas'
     }
     return render(request, 'proveedores/proveedor_bebidas.html', data)
 
 def proveedor_alimentos(request):
-    articulos = ProductoProveedor.objects.all()
+    articulos = ProductoProveedor.objects.filter(proveedor__nombre="Grupo Almar").order_by('nombre')
+    articulos_paginados = paginado_proveedores(request, articulos)
     data = {
-        'articulos':articulos
+        'articulos':articulos_paginados,
+        'paginator':articulos_paginados.paginator,
+        'contexto':'articulos'
     }
     return render(request, 'proveedores/proveedor_alimentos.html', data)
 
 def proveedor_congelados(request):
-    return render(request, 'proveedores/proveedor_congelados.html')
+    congelados = ProductoProveedor.objects.filter(proveedor__nombre="Congelados Food").order_by('nombre')
+    congelados_paginados = paginado_proveedores(request, congelados)
+    data = {
+        'congelados':congelados_paginados,
+        'paginator':congelados_paginados.paginator,
+        'contexto':'congelados'
+    }
+    return render(request, 'proveedores/proveedor_congelados.html', data)

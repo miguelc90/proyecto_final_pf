@@ -1,0 +1,17 @@
+{% if paginator.num_pages > 1 %}
+<div class="d-flex justify-content-center">
+    <ul class="pagination">
+        {% if productos.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ productos.previous_page_number }}">Anterior</a></li>
+        {% endif %}
+        {% for page in paginator.page_range %}
+            <li class="page-item {% if page == productos.number %}active{% endif %}">
+                <a class="page-link" href="?page={{ page }}">{{ page }}</a>
+            </li>
+        {% endfor %}
+        {% if productos.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ productos.next_page_number }}">Siguiente</a></li>
+        {% endif %}
+    </ul>
+</div>
+{% endif %}

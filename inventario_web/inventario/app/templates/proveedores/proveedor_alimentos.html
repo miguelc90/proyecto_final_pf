@@ -1,5 +1,7 @@
 {% extends 'inventario/base.html' %} 
 
+{% load static %}
+
 {% block contenido %}
 
 {% load humanize %}
@@ -20,7 +22,7 @@
     {% for articulo in articulos %}
         {% if articulo.proveedor.nombre == "Grupo Almar" %}
             <tr>
-                <td>{{ articulo.nombre }}</td>
+                <td><span id="contador-{{ articulo.id }}" class="position-absolute translate-middle badge rounded-pill bg-danger" hidden>0</span> {{ articulo.nombre }}</td>
                 <td>{{ articulo.descripcion }}</td>
                 <td>{{ articulo.fecha_vencimiento | date:"d/m/y" }}</td>
                 <td>{{ articulo.codigo_bulto }}</td>
@@ -28,12 +30,15 @@
                 <td>${{ articulo.precio_bulto }}</td>
                 <td>{{ articulo.marca }}</td>
                 <td>
-                    <a href="" class="btn btn-success btn-sm">+</a>
-                    <a href="" class="btn btn-danger btn-sm">-</a>
+                    <button data-id="{{ articulo.id }}" class="incrementar btn btn-success btn-sm">+</button>
+                    <button data-id="{{ articulo.id }}" class="disminuir btn btn-danger btn-sm">-</button>
                 </td>
             </tr>
         {% endif %}
     {% endfor %}
 </table>
-
+{% include 'proveedores/paginator_proveedores.html' with productos=articulos %}
+    {% block js %}
+        <script src="{% static 'proveedores/js/proveedores.js' %}"></script>
+    {% endblock %}
 {% endblock %}

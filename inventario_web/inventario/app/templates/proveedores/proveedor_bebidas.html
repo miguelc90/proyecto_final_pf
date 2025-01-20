@@ -1,11 +1,21 @@
 {% extends 'inventario/base.html' %} 
 
+{% load static %}
+
 {% block contenido %}
 
 {% load humanize %}
-<h1>SRB Distribuidora</h1>
-
-<table class="table table-striped table-hover table-responsive-sm table-warning">
+<div class="d-flex justify-content-between">
+    <div>
+        <h1>SRB Distribuidora</h1>
+    </div>
+    <div>
+        <button class="btn btn-primary mt-2"> 
+            <i class="bi bi-cart fs-5"></i> Carrito de Compras 
+        </button>
+    </div>
+</div>
+<table class="table table-striped table-hover table-responsive-sm table-warning mt-1">
     <thead class="table-dark">
         <th>Nombre</th>
         <th>Descripción</th>
@@ -20,20 +30,23 @@
     {% for bebida in bebidas %}
         {% if bebida.proveedor.nombre == "SRB Distribuidora" %}
             <tr>
-                <td>{{ bebida.nombre }}</td>
+                <td><span id="contador-{{ bebida.id }}" class="position-absolute translate-middle badge rounded-pill bg-danger" hidden>0</span> {{ bebida.nombre }}</td>
                 <td>{{ bebida.descripcion }}</td>
                 <td>{{ bebida.fecha_vencimiento | date:"d/m/y" }}</td>
                 <td>{{ bebida.codigo_bulto }}</td>
                 <td>{{ bebida.cantidad_bulto }}</td>
-                <td>{{ bebida.precio_bulto }}</td>
+                <td>${{ bebida.precio_bulto }}</td>
                 <td>{{ bebida.marca }}</td>
                 <td>
-                    <a href="" class="btn btn-success btn-sm">+</a>
-                    <a href="" class="btn btn-danger btn-sm">-</a>
+                    <button data-id="{{ bebida.id }}" class="incrementar btn btn-success btn-sm">+</button>
+                    <button data-id="{{ bebida.id }}" class="disminuir btn btn-danger btn-sm">-</button>
                 </td>
             </tr>
         {% endif %}
     {% endfor %}
 </table>
-
+{% include 'proveedores/paginator_proveedores.html' with productos=bebidas %}
+    {% block js %}
+        <script src="{% static 'proveedores/js/proveedores.js' %}"></script>
+    {% endblock %}
 {% endblock %}
