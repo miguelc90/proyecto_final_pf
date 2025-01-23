@@ -5,7 +5,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import logout
-from .models import Producto, UserSession, Proveedor, ProductoProveedor, CarritoItem
+from .models import Producto, UserSession, Proveedor, ProductoProveedor, CarritoItem, CarritoHistorial
 from .forms import ProductoForm, CarritoItemForm
 from django.contrib import messages
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -26,8 +26,6 @@ def paginado_inventario(request, items, items_por_pagina=7):
     except EmptyPage:
         items = paginator.page(paginator.num_pages)
     return items
-
-from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 
 def paginado_proveedores(request, queryset, items_por_pagina=10):
     page = request.GET.get('page', 1)
@@ -160,75 +158,67 @@ def proveedor_congelados(request):
 #Carrito
 
 def ver_carrito(request):
-    # Obtener los items del carrito que aún no han sido procesados
     carrito_items = CarritoItem.objects.filter(procesado=False, eliminado=False)
 
-    # Inicializar el total general
     total = Decimal(0)
 
     if request.method == 'POST':
-        # Procesar cambios en las cantidades enviadas desde el formulario
         for item in carrito_items:
-            cantidad_str = request.POST.get(f'cantidad_{item.producto.id}')  # Capturar la cantidad para cada producto
+            cantidad_str = request.POST.get(f'cantidad_{item.producto.id}')
             if cantidad_str:
                 try:
-                    cantidad = int(cantidad_str)  # Convertir la cantidad a entero
-                    if cantidad > 0:  # Solo se permiten cantidades positivas
-                        # Actualizar la cantidad y recalcular el subtotal
+                    cantidad = int(cantidad_str)
+                    if cantidad > 0: 
                         item.cantidad = cantidad
                         item.sub_total = item.producto.precio_bulto * cantidad
-                        item.save()  # Guardar cambios en la base de datos
+                        item.save()
                         total += item.sub_total
                 except ValueError:
-                    pass  # Si la cantidad no es válida, ignorar este item
+                    pass 
 
-        # Guardar el total en la sesión
         request.session['total'] = float(total)
 
-        # Redirigir para actualizar la página
         return redirect('ver_carrito')
 
-    # Si el método es GET, calcular el total general con los datos actuales del carrito
     for item in carrito_items:
         total += item.sub_total
 
-    # Guardar el total en la sesión
     request.session['total'] = float(total)
 
-    # Renderizar la plantilla con los datos del carrito
     return render(request, 'inventario/ver_carrito.html', {'carrito_items': carrito_items, 'total': total})
 
 
 def agregar_al_carrito(request, producto_id):
-    # Obtener el producto por su ID
     producto = get_object_or_404(ProductoProveedor, id=producto_id)
+    
+    cantidad = int(request.POST.get('cantidad', 1)) 
+    print(f"Cantidad seleccionada: {cantidad}")  
 
-    if request.method == 'POST':
-        # Agregar el producto al carrito con una cantidad inicial de 1
-        carrito_item, created = CarritoItem.objects.get_or_create(
-            producto=producto,
-            procesado=False,
-            eliminado=False,
-            defaults={'cantidad': 1}
-        )
+    carrito_item, created = CarritoItem.objects.get_or_create(producto=producto, procesado=False, eliminado=False)
+    
+    if created:
+        carrito_item.cantidad = cantidad
+    else:
 
-        if not created:
-            # Si el producto ya está en el carrito, no se hace nada
-            pass
+        carrito_item.cantidad += cantidad
+    
+    carrito_item.sub_total = carrito_item.producto.precio_bulto * carrito_item.cantidad
+    carrito_item.total_a_pagar = carrito_item.sub_total 
+    carrito_item.save() 
 
-        # Redirigir a la lista de bebidas
-        return redirect('bebidas')
+    return redirect('bebidas')
 
 
 
 def eliminar_item(request, id):
     producto = get_object_or_404(CarritoItem, id=id)
     producto.eliminado = True
-    producto.save()
+    producto.procesado = True
+    producto.delete()
     messages.success(request, 'el producto se eliminó de la lista')
     return redirect(to='ver_carrito')
 
-def generar_pdf(request):
+def generar_pdf(carrito_items):
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="carrito.pdf"'
 
@@ -250,12 +240,9 @@ def generar_pdf(request):
     p.drawString(350, 700, "Precio por bulto")
     p.drawString(500, 700, "Subtotal")
 
-    # Obtén los items del carrito
-    items = CarritoItem.objects.all()  # Puedes filtrar según 'procesado=False' si necesitas solo los items no procesados.
-
-    y = 680 #REPARAR EL PDF Y LA BASE DE DATOS PARA QUE ME MUESTRE DE A UNA TRANSACCION
+    y = 680
     sub_total = 0
-    for item in items:
+    for item in carrito_items:
         # Información del producto
         p.setFont("Helvetica", 12)
         p.drawString(100, y, item.producto.nombre)
@@ -264,7 +251,7 @@ def generar_pdf(request):
         item.sub_total = item.producto.precio_bulto * item.cantidad
         p.drawString(500, y, f"${item.sub_total}")
         y -= 20  # Movemos la posición para el siguiente producto
-        sub_total += item.sub_total  # Acumulamos el subtotal total
+        sub_total += item.sub_total 
 
     # Calculamos el total a pagar (total de todos los productos)
     total_a_pagar = sub_total
@@ -278,10 +265,8 @@ def generar_pdf(request):
     p.save()
     return response
 
-
 def pagar_productos(request):
     total = Decimal(0)
-
     carrito_items = CarritoItem.objects.filter(procesado=False, eliminado=False)
     
     if request.method == 'POST':
@@ -301,11 +286,29 @@ def pagar_productos(request):
                 except ValueError:
                     continue
         
+        # Generar el PDF antes de eliminar los items
+        response = generar_pdf(carrito_items)
+        print(response)
+
+        # Copiar los items al historial antes de eliminarlos
+        for item in carrito_items:
+            CarritoHistorial.objects.create(
+                producto=item.producto,
+                cantidad=item.cantidad,
+                sub_total=item.sub_total,
+                total_a_pagar=item.total_a_pagar,
+                procesado=True,
+                eliminado=item.eliminado
+            )
+            item.delete()
+
         request.session['total'] = float(total)
 
-        return redirect('pagar_productos')  
+        return response
+    
 
     return render(request, 'inventario/pagar_productos.html', {'carrito_items': carrito_items, 'total': total})
+
 
 
 

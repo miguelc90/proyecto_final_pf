@@ -77,3 +77,15 @@ class CarritoItem(models.Model):
 
     def __str__(self):
         return f'{self.producto.nombre} - {self.cantidad}'
+    
+class CarritoHistorial(models.Model):
+    producto = models.ForeignKey(ProductoProveedor, on_delete=models.CASCADE)
+    cantidad = models.PositiveIntegerField(default=1)
+    sub_total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total_a_pagar = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    procesado = models.BooleanField(default=False)
+    eliminado = models.BooleanField(default=False)
+    fecha_procesado = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.producto.nombre} - {self.cantidad}'

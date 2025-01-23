@@ -23,7 +23,7 @@
                             <div>
                                 <h5>{{ item.producto.nombre }} {{ item.producto.marca }}</h5>
                                 <p class="text-muted">{{ item.producto.descripcion }}</p>
-                                <input type="number" class="form-control w-25" name="cantidad_{{ item.producto.id }}" value="{{ item.cantidad }}" data-precio="{{ item.producto.precio_bulto|floatformat:2 }}" onchange="actualizarSubtotal(this)">
+                                <input type="number" class="form-control w-25" min="1" name="cantidad_{{ item.producto.id }}" value="{{ item.cantidad }}" data-precio="{{ item.producto.precio_bulto|floatformat:2 }}" onchange="actualizarSubtotal(this)">
                             </div>
                         </div>
                         <div class="d-flex flex-column justify-content-between">
