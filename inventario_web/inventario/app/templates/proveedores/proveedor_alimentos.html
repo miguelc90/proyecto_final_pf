@@ -30,8 +30,10 @@
                 <td>${{ articulo.precio_bulto }}</td>
                 <td>{{ articulo.marca }}</td>
                 <td>
-                    <button data-id="{{ articulo.id }}" class="incrementar btn btn-success btn-sm">+</button>
-                    <button data-id="{{ articulo.id }}" class="disminuir btn btn-danger btn-sm">-</button>
+                    <div class="form-check form-switch"> 
+                        <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault"> 
+                        <label class="form-check-label" for="flexSwitchCheckDefault">Agregar al carrito</label>
+                    </div>
                 </td>
             </tr>
         {% endif %}

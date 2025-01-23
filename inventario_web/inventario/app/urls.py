@@ -15,4 +15,9 @@ urlpatterns = [
     path('proveedor-bebidas/', views.proveedor_bebidas, name='bebidas'),
     path('proveedor-alimentos/', views.proveedor_alimentos, name='alimentos'),
     path('proveedor-congelados/', views.proveedor_congelados, name='congelados'),
+    path('agregar-al-carrito/<int:producto_id>/', views.agregar_al_carrito, name='agregar_al_carrito'),
+    path('ver-carrito/', views.ver_carrito, name='ver_carrito'),
+    path('eliminar-item/<int:id>/', views.eliminar_item, name='eliminar_item'),
+    path('generar-pdf/', views.generar_pdf, name='generar_pdf'),
+    path('pagar-productos/', views.pagar_productos, name='pagar_productos'),
 ]

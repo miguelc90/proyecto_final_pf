@@ -1,5 +1,5 @@
 from django import forms
-from .models import Producto
+from .models import Producto, CarritoItem
 from django.forms import ValidationError
 
 
@@ -13,3 +13,14 @@ class ProductoForm(forms.ModelForm):
         widgets = {
             'fecha_fabricacion': forms.SelectDateWidget()
         }
+
+
+class CarritoItemForm(forms.ModelForm):
+    class Meta:
+        model = CarritoItem
+        fields = ['producto', 'cantidad']
+        widgets = {
+            'producto': forms.HiddenInput(),
+            'cantidad': forms.HiddenInput(),
+        }
+

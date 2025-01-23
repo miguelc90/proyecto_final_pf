@@ -1,0 +1,59 @@
+{% extends 'inventario/base.html' %} 
+{% block contenido %}
+
+{% load crispy_forms_tags %}
+
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'inventario/css/agregar.css' %}">
+
+{% load humanize %}
+
+<form method="post" action="{% url 'pagar_productos' %}">
+    {% csrf_token %}
+    <div class="container mt-5 bg-light formulario-personalizado">
+        <div class="row">
+            <!-- Shopping Cart Items -->
+            <div class="col-lg-8">
+                <h3>Lista de productos</h3>
+                    <!-- Cart Item 1 -->
+                    {% for item in carrito_items %}
+                    <div class="cart-item d-flex justify-content-between">
+                        <div class="d-flex">
+                            <div>
+                                <h5>{{ item.producto.nombre }} {{ item.producto.marca }}</h5>
+                                <p class="text-muted">{{ item.producto.descripcion }}</p>
+                                <input type="number" class="form-control w-25" name="cantidad_{{ item.producto.id }}" value="{{ item.cantidad }}" data-precio="{{ item.producto.precio_bulto|floatformat:2 }}" onchange="actualizarSubtotal(this)">
+                            </div>
+                        </div>
+                        <div class="d-flex flex-column justify-content-between">
+                            <span class="subtotal">${{ item.sub_total }}</span>
+                            <a href="#" class="btn btn-sm btn-danger" onclick="eliminar_item_lista('{{ item.id }}')">Eliminar</a>
+                        </div>
+                    </div>
+                    <hr>
+                    {% endfor %}
+            </div>
+
+            <!-- Cart Summary -->
+            <div class="col-lg-4">
+                <div class="cart-summary">
+                    <h4>Cart Summary</h4>
+                    <ul class="list-unstyled">
+                        <li class="d-flex justify-content-between">
+                            <span>Total:</span>
+                            <span id="total-price">${{ total }}</span>
+                        </li>
+                        &nbsp;
+                    <button type="submit" class="btn btn-checkout btn-info w-100">Proceder al pago</button>
+                    &nbsp;
+                    <a href="{% url 'generar_pdf' %}" class="btn btn-checkout btn-danger w-100">Imprimir resumen</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+    {% block js %}
+    <script src="{% static 'inventario/js/carrito.js' %}"></script>
+    {% endblock %}
+{% endblock %}
