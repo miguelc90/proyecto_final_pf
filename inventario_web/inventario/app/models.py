@@ -78,6 +78,15 @@ class CarritoItem(models.Model):
     def __str__(self):
         return f'{self.producto.nombre} - {self.cantidad}'
     
+
+class Transacciones(models.Model):
+    total_final_a_pagar = models.DecimalField(max_digits=10, decimal_places=2)
+    fecha_transaccion = models.DateTimeField(auto_now_add=True)
+    pdf = models.FileField(upload_to='transacciones_pdfs/', null=True, blank=True)
+
+    def __str__(self):
+        return f'Transacción {self.id} - Total: {self.total_final_a_pagar}'
+    
 class CarritoHistorial(models.Model):
     producto = models.ForeignKey(ProductoProveedor, on_delete=models.CASCADE)
     cantidad = models.PositiveIntegerField(default=1)
@@ -86,6 +95,11 @@ class CarritoHistorial(models.Model):
     procesado = models.BooleanField(default=False)
     eliminado = models.BooleanField(default=False)
     fecha_procesado = models.DateTimeField(auto_now_add=True)
+    transaccion = models.ForeignKey(Transacciones, on_delete=models.CASCADE, related_name='items')
 
     def __str__(self):
         return f'{self.producto.nombre} - {self.cantidad}'
+
+    
+
+

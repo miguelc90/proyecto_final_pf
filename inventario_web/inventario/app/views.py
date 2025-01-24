@@ -1,15 +1,20 @@
 from decimal import Decimal
-from django.http import Http404, HttpResponse
+import os
+from django.http import Http404, HttpResponse, HttpResponseRedirect
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import logout
-from .models import Producto, UserSession, Proveedor, ProductoProveedor, CarritoItem, CarritoHistorial
+from django.core.files import File
+
+from inventario import settings
+from .models import Producto, Transacciones, UserSession, Proveedor, ProductoProveedor, CarritoItem, CarritoHistorial
 from .forms import ProductoForm, CarritoItemForm
 from django.contrib import messages
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.decorators import login_required, permission_required
+
 
 # Create your views here.
 @login_required
@@ -192,7 +197,6 @@ def agregar_al_carrito(request, producto_id):
     producto = get_object_or_404(ProductoProveedor, id=producto_id)
     
     cantidad = int(request.POST.get('cantidad', 1)) 
-    print(f"Cantidad seleccionada: {cantidad}")  
 
     carrito_item, created = CarritoItem.objects.get_or_create(producto=producto, procesado=False, eliminado=False)
     
@@ -218,11 +222,10 @@ def eliminar_item(request, id):
     messages.success(request, 'el producto se eliminó de la lista')
     return redirect(to='ver_carrito')
 
-def generar_pdf(carrito_items):
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="carrito.pdf"'
 
-    p = canvas.Canvas(response, pagesize=letter)
+def generar_pdf(carrito_items):
+    pdf_path = os.path.join(settings.MEDIA_ROOT, 'transacciones_pdfs', 'carrito.pdf')
+    p = canvas.Canvas(pdf_path, pagesize=letter)
     width, height = letter
 
     # Título del PDF
@@ -243,32 +246,30 @@ def generar_pdf(carrito_items):
     y = 680
     sub_total = 0
     for item in carrito_items:
-        # Información del producto
         p.setFont("Helvetica", 12)
         p.drawString(100, y, item.producto.nombre)
         p.drawString(250, y, str(item.cantidad))
         p.drawString(350, y, f"${item.producto.precio_bulto}")
         item.sub_total = item.producto.precio_bulto * item.cantidad
         p.drawString(500, y, f"${item.sub_total}")
-        y -= 20  # Movemos la posición para el siguiente producto
+        y -= 20
         sub_total += item.sub_total 
 
-    # Calculamos el total a pagar (total de todos los productos)
     total_a_pagar = sub_total
 
     # Total a pagar
     p.setFont("Helvetica-Bold", 14)
     p.drawString(100, y - 40, f"Total a pagar: ${total_a_pagar}")
 
-    # Guardar el PDF y enviarlo como respuesta
+    # Guardar el PDF
     p.showPage()
     p.save()
-    return response
+    return pdf_path
 
 def pagar_productos(request):
     total = Decimal(0)
     carrito_items = CarritoItem.objects.filter(procesado=False, eliminado=False)
-    
+
     if request.method == 'POST':
         for item in carrito_items:
             cantidad_str = request.POST.get(f'cantidad_{item.producto.id}')
@@ -286,11 +287,12 @@ def pagar_productos(request):
                 except ValueError:
                     continue
         
-        # Generar el PDF antes de eliminar los items
-        response = generar_pdf(carrito_items)
-        print(response)
+        transaccion = Transacciones.objects.create(total_final_a_pagar=total)
+        pdf_path = generar_pdf(carrito_items)
 
-        # Copiar los items al historial antes de eliminarlos
+        with open(pdf_path, 'rb') as pdf_file:
+            transaccion.pdf.save('carrito.pdf', File(pdf_file))
+        
         for item in carrito_items:
             CarritoHistorial.objects.create(
                 producto=item.producto,
@@ -298,18 +300,39 @@ def pagar_productos(request):
                 sub_total=item.sub_total,
                 total_a_pagar=item.total_a_pagar,
                 procesado=True,
-                eliminado=item.eliminado
+                eliminado=item.eliminado,
+                transaccion=transaccion
             )
             item.delete()
 
         request.session['total'] = float(total)
+        return redirect(f'/pagar-productos/?file={transaccion.id}')
 
-        return response
+    file_id = request.GET.get('file')
+    return render(request, 'inventario/pagar_productos.html', {'carrito_items': carrito_items, 'total': total, 'file_id': file_id})
+
+
+def descargar_pdf(request):
+    file_id = request.GET.get('file')
+    if not file_id:
+        return HttpResponse('ID de transacción no proporcionado', status=400)
+
+    try:
+        transaccion = Transacciones.objects.get(id=file_id)
+        if not transaccion.pdf:
+            return HttpResponse('PDF no asociado a la transacción', status=404)
+
+        file_path = transaccion.pdf.path
+        if os.path.exists(file_path):
+            with open(file_path, 'rb') as f:
+                response = HttpResponse(f.read(), content_type='application/pdf')
+                response['Content-Disposition'] = f'attachment; filename="{os.path.basename(file_path)}"'
+                return response
+        else:
+            return HttpResponse('Archivo no encontrado', status=404)
     
-
-    return render(request, 'inventario/pagar_productos.html', {'carrito_items': carrito_items, 'total': total})
-
-
+    except Transacciones.DoesNotExist:
+        return HttpResponse('Transacción no encontrada', status=404)
 
 
 

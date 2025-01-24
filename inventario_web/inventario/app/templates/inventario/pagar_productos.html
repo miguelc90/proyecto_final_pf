@@ -1,13 +1,17 @@
-{% extends 'inventario/base.html' %} 
+{% extends 'inventario/base.html' %}
 {% block contenido %}
 
-{% load crispy_forms_tags %}
-
 {% load static %}
-
 <link rel="stylesheet" href="{% static 'inventario/css/agregar.css' %}">
 
-{% load humanize %}
 <h1>Aca va el pago</h1>
-<a href="{% url 'generar_pdf' %}" class="btn btn-checkout btn-danger w-100">Imprimir resumen</a>
+{% if file_id %}
+    <a href="{% url 'descargar_pdf' %}?file={{ file_id }}" class="btn btn-checkout btn-danger w-100">
+        Imprimir resumen
+    </a>
+{% else %}
+    <p>No hay PDF disponible para descargar.</p>
+{% endif %}
+
 {% endblock %}
+
