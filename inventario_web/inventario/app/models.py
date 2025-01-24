@@ -69,6 +69,7 @@ class UserSession(models.Model):
 
 class CarritoItem(models.Model):
     producto = models.ForeignKey(ProductoProveedor, on_delete=models.CASCADE)
+    proveedor = models.ForeignKey(Proveedor, on_delete=models.CASCADE, null=True, blank=True)
     cantidad = models.PositiveIntegerField(default=1)
     sub_total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     total_a_pagar = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -89,6 +90,7 @@ class Transacciones(models.Model):
     
 class CarritoHistorial(models.Model):
     producto = models.ForeignKey(ProductoProveedor, on_delete=models.CASCADE)
+    proveedor = models.ForeignKey(Proveedor, on_delete=models.CASCADE, null=True, blank=True)
     cantidad = models.PositiveIntegerField(default=1)
     sub_total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     total_a_pagar = models.DecimalField(max_digits=10, decimal_places=2, default=0)

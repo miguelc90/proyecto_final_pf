@@ -1,5 +1,6 @@
+
 from decimal import Decimal
-import os
+import os, locale
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
@@ -7,6 +8,7 @@ from reportlab.lib import colors
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import logout
 from django.core.files import File
+from datetime import datetime
 
 from inventario import settings
 from .models import Producto, Transacciones, UserSession, Proveedor, ProductoProveedor, CarritoItem, CarritoHistorial
@@ -195,22 +197,33 @@ def ver_carrito(request):
 
 def agregar_al_carrito(request, producto_id):
     producto = get_object_or_404(ProductoProveedor, id=producto_id)
-    
-    cantidad = int(request.POST.get('cantidad', 1)) 
 
-    carrito_item, created = CarritoItem.objects.get_or_create(producto=producto, procesado=False, eliminado=False)
-    
-    if created:
-        carrito_item.cantidad = cantidad
-    else:
-
-        carrito_item.cantidad += cantidad
+    carrito_item, created = CarritoItem.objects.get_or_create(
+        producto=producto,
+        procesado=False,
+        eliminado=False,
+        defaults={'proveedor': producto.proveedor}
+    )
     
     carrito_item.sub_total = carrito_item.producto.precio_bulto * carrito_item.cantidad
-    carrito_item.total_a_pagar = carrito_item.sub_total 
+    carrito_item.total_a_pagar = carrito_item.sub_total
+    
+    carrito_item.proveedor = producto.proveedor
     carrito_item.save() 
 
-    return redirect('bebidas')
+    messages.success(request, f"El producto {producto} se agregó al carrito correctamente")
+    
+    if producto.proveedor.nombre == "SRB Distribuidora":
+        return redirect("bebidas")
+    elif producto.proveedor.nombre == "Grupo Almar":
+        return redirect("alimentos")
+    elif producto.proveedor.nombre == "Congelados Food":
+        return redirect("congelados")
+    
+    return render(request, "inventario/home.html")
+
+    
+
 
 
 
@@ -228,30 +241,38 @@ def generar_pdf(carrito_items):
     p = canvas.Canvas(pdf_path, pagesize=letter)
     width, height = letter
 
+    locale.setlocale(locale.LC_TIME, 'es_AR.UTF-8')
+
+    fecha_actual = datetime.now()
+
+    formato_local = fecha_actual.strftime("%A, %d de %B de %Y")
+
     # Título del PDF
     p.setFont("Helvetica-Bold", 16)
     p.drawString(100, 750, "Lista de Productos del Carrito")
 
     # Subtítulo con la fecha
     p.setFont("Helvetica", 12)
-    p.drawString(100, 730, "Fecha: 22 de enero de 2025")
+    p.drawString(100, 730, f"Fecha: {formato_local}")
 
     # Encabezados de las columnas
     p.setFont("Helvetica-Bold", 12)
     p.drawString(100, 700, "Producto")
-    p.drawString(250, 700, "Cantidad")
-    p.drawString(350, 700, "Precio por bulto")
-    p.drawString(500, 700, "Subtotal")
+    p.drawString(200, 700, "Cantidad")
+    p.drawString(300, 700, "Precio por bulto")
+    p.drawString(420, 700, "Proveedor")
+    p.drawString(530, 700, "Subtotal")
 
     y = 680
     sub_total = 0
     for item in carrito_items:
         p.setFont("Helvetica", 12)
         p.drawString(100, y, item.producto.nombre)
-        p.drawString(250, y, str(item.cantidad))
-        p.drawString(350, y, f"${item.producto.precio_bulto}")
+        p.drawString(200, y, str(item.cantidad))
+        p.drawString(300, y, f"${item.producto.precio_bulto}")
         item.sub_total = item.producto.precio_bulto * item.cantidad
-        p.drawString(500, y, f"${item.sub_total}")
+        p.drawString(420, y, f"{item.proveedor}")
+        p.drawString(530, y, f"${item.sub_total}")
         y -= 20
         sub_total += item.sub_total 
 
@@ -296,6 +317,7 @@ def pagar_productos(request):
         for item in carrito_items:
             CarritoHistorial.objects.create(
                 producto=item.producto,
+                proveedor=item.proveedor,
                 cantidad=item.cantidad,
                 sub_total=item.sub_total,
                 total_a_pagar=item.total_a_pagar,
