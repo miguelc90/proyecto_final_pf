@@ -17,13 +17,13 @@
             <ul class="navbar-nav">
                 {% if user.is_authenticated %}
                     <li class="navbar-nav-item">
-                        <a class="nav-link disabled text-primary" href="">Bienvenido/a: {{ user.username }}</a>
+                        <a class="nav-link disabled text-primary" href=""><i class="bi bi-person"></i> Bienvenido/a: {{ user.username }}</a>
                     </li>
                     <li class="navbar-nav-item">
-                        <a class="nav-link" href="{% url 'admin:index' %}">ir a administración</a>
+                        <a class="nav-link" href="{% url 'admin:index' %}"><i class="bi bi-shield-lock"></i> ir a administración</a>
                     </li>
                     <li class="navbar-nav-item">
-                        <a class="nav-link" href="{% url 'salir' %}">cerrar sesion</a>
+                        <a class="nav-link" href="{% url 'salir' %}"><i class="bi bi-box-arrow-right"></i> cerrar sesion</a>
                     </li>
                 {% else %}
                     <li class="navbar-nav-item">
@@ -36,46 +36,45 @@
     <div class="container-fluid">
         <div class="row">
             <div id="menu" class="col-2">
-                <h3 class="dash">STOCKMARKET</h3>
+                <div class="logo">
+                    <img src="/media/img/menu/logo.png" alt="">
+                </div>
                 <ul class="list-group">
                     <li class="list-group-item">
-                        <a class="nav-link" href="{% url 'home' %}">Dashboard</a>
+                        <a class="nav-link" href="{% url 'home' %}"><i class="bi bi-house"></i> Dashboard</a>
                     </li>
                     <li class="list-group-item">
-                        <a class="nav-link" href="{% url 'listado' %}">Inventario</a>
+                        <a class="nav-link" href="{% url 'listado' %}"> <i class="bi bi-box-seam"></i> Inventario</a>
                     </li>
                     <li class="list-group-item">
-                        <a class="nav-link" href="{% url 'agregar_producto' %}">Agregar Productos</a>
+                        <a class="nav-link" href="{% url 'agregar_producto' %}"><i class="bi bi-cart-plus"></i> Agregar Prod.</a>
                     </li>
                     <li class="list-group-item">
-                        <a class="nav-link" href="{% url 'proveedores' %}">Proveedores</a>
+                        <a class="nav-link" href="{% url 'proveedores' %}"><i class="bi bi-truck"></i> Proveedores</a>
                     </li>
                     <li class="list-group-item">
-                        <a class="nav-link" href="#">Reportes</a>
+                        <a class="nav-link" href="#"><i class="bi bi-journals"></i> Reportes</a>
                     </li>
                     <li class="list-group-item">
-                        <a class="nav-link" href="#">Balances</a>
+                        <a class="nav-link" href="#"><i class="bi bi-currency-dollar"></i> Balances</a>
                     </li>
                     <li class="list-group-item">
-                        <a class="nav-link" href="#">Estadísticas</a>
+                        <a class="nav-link" href="#"><i class="bi bi-graph-up"></i> Estadísticas</a>
                     </li>
                     <li class="list-group-item">
-                        <a class="nav-link" href="#">Pedidos</a>
+                        <a class="nav-link" href="#"><i class="bi bi-bag"></i> Pedidos</a>
                     </li>
+                    {% if perms.sesiones.view %}
+                        <li class="list-group-item">
+                            <a class="nav-link" href="{% url 'sesion_usuario' %}"><i class="bi bi-file-earmark-person"></i> Logs</a>
+                        </li>
+                    {% else %}
+                        <li class="list-group-item">
+                            <a class="nav-link" href="#" onclick="error_permiso()"><i class="bi bi-file-earmark-person"></i> Logs</a>
+                        </li>
+                    {% endif %}
                     <li class="list-group-item">
-                        <a class="nav-link" href="{% url 'sesion_usuario' %}">Logs</a>
-                    </li>
-                    <li class="list-group-item">
-                        <a class="nav-link" href="#">Proveedores</a>
-                    </li>
-                    <li class="list-group-item">
-                        <a class="nav-link" href="#">Proveedores</a>
-                    </li>
-                    <li class="list-group-item">
-                        <a class="nav-link" href="#">Proveedores</a>
-                    </li>
-                    <li class="list-group-item">
-                        <a class="nav-link" href="#">Soporte</a>
+                        <a class="nav-link" href="#"><i class="bi bi-patch-question"></i> Soporte</a>
                     </li>
                 </ul>
             </div>
@@ -86,6 +85,7 @@
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{% static 'inventario/js/base.js' %}"></script>
     {% if messages %}
 
         {% for mensaje in messages %}

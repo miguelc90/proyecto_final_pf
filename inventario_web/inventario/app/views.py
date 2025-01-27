@@ -12,17 +12,105 @@ from datetime import datetime
 
 from inventario import settings
 from .models import Producto, Transacciones, UserSession, Proveedor, ProductoProveedor, CarritoItem, CarritoHistorial
-from .forms import ProductoForm, CarritoItemForm
+from .models import Categoria
+from .forms import ProductoForm
 from django.contrib import messages
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.decorators import login_required, permission_required
+import plotly.graph_objects as go
+from plotly.colors import sample_colorscale
 
 
 # Create your views here.
+
+#inicio
 @login_required
 def home(request):
-    return render(request, "inventario/home.html")
+    #datos para las tarjetas
+    producto_activo = Producto.objects.filter(activo=True).count()
+    producto_inactivo = Producto.objects.filter(activo=False).count()
+    proveedor_activo = Proveedor.objects.filter(activo=True).count()
+    proveedor_inactivo = Proveedor.objects.filter(activo=False).count()
+    productos_cargados = producto_activo+producto_inactivo
 
+    #grafico
+    categorias = Categoria.objects.all()
+    nombres_categorias = []
+    datos = []
+
+    for categoria in categorias:
+        cantidad = Producto.objects.filter(categoria=categoria).count()
+        nombres_categorias.append(categoria.nombre)
+        datos.append(cantidad)
+
+    # Normalizar los datos para aplicar una escala de colores
+    max_dato = max(datos) if datos else 1
+    colores = sample_colorscale('Viridis', [cantidad / max_dato for cantidad in datos])
+
+    # Crear un gráfico moderno
+    fig = go.Figure(data=[
+        go.Bar(
+            x=nombres_categorias,
+            y=datos,
+            text=datos,  # Mostrar los valores directamente sobre las barras
+            textposition='auto',
+            marker=dict(
+                color=colores,  # Colores dinámicos de la escala 'Viridis'
+                line=dict(color='rgba(0, 0, 0, 0.8)', width=1.5)  # Bordes negros para destacar las barras
+            ),
+            hoverinfo='x+y',  # Información al pasar el mouse
+        )
+    ])
+
+    # Personalizar el diseño
+    fig.update_layout(
+        title=dict(
+            text="Cantidad de Productos por Categoría",
+            x=0.5,
+            font=dict(size=24, color='rgba(58, 71, 80, 1.0)')
+        ),
+        xaxis=dict(
+            title="Categorías",
+            titlefont=dict(size=18, color='rgba(58, 71, 80, 1.0)'),
+            tickfont=dict(size=14, color='rgba(58, 71, 80, 0.8)'),
+            showgrid=True,
+            gridcolor='rgba(200, 200, 200, 0.2)'  # Líneas de la grilla más suaves
+        ),
+        yaxis=dict(
+            title="Cantidad de Productos",
+            titlefont=dict(size=18, color='rgba(58, 71, 80, 1.0)'),
+            tickfont=dict(size=14, color='rgba(58, 71, 80, 0.8)'),
+            showgrid=True,
+            gridcolor='rgba(200, 200, 200, 0.2)'  # Líneas de la grilla más suaves
+        ),
+        legend=dict(
+            bgcolor='rgba(230, 230, 240, 0.5)',  # Fondo de la leyenda semitransparente
+            bordercolor='rgba(0, 0, 0, 0.3)',    # Borde de la leyenda
+            borderwidth=1,
+            font=dict(size=14, color='rgba(58, 71, 80, 1.0)')
+        ),
+        # Fondo del gráfico y área completa
+        plot_bgcolor='rgba(230, 230, 240, 1)',  # Fondo del gráfico (gris claro)
+        paper_bgcolor='rgba(245, 245, 250, 1)',  # Fondo del área completa (gris más claro)
+        margin=dict(t=70, l=50, r=50, b=70),  # Márgenes cómodos
+        showlegend=False,  # Mostrar leyenda
+    )
+
+
+    # Convertir el gráfico a HTML
+    grafico_html = fig.to_html(full_html=False)
+
+    data = {
+        'activos':producto_activo,
+        'inactivos':producto_inactivo,
+        'proveedores_activos':proveedor_activo,
+        'proveedores_inactivos':proveedor_inactivo,
+        'productos_cargados':productos_cargados,
+        'grafico':grafico_html,
+    }
+    return render(request, "inventario/home.html", data)
+
+#paginados
 def paginado_inventario(request, items, items_por_pagina=7):
     page = request.GET.get('page', 1) 
     paginator = Paginator(items, items_por_pagina) 
@@ -46,6 +134,7 @@ def paginado_proveedores(request, queryset, items_por_pagina=10):
         pagina = paginator.page(paginator.num_pages)
     return pagina
 
+#sesiones
 
 @login_required
 def listado(request): 
@@ -66,8 +155,17 @@ def logout_view(request):
     return redirect('home')
 
 def sesion_usuario(request):
-    sesion = UserSession.objects.all()
-    return render(request, 'inventario/sesion_usuario.html', {'sesiones': sesion})
+    sesiones = UserSession.objects.all().order_by('-login_time')
+
+    sesiones_paginadas = paginado_proveedores(request, sesiones, 15)
+
+    return render(request, 'inventario/sesion_usuario.html', {
+        'sesiones': sesiones_paginadas,
+        'paginator': sesiones_paginadas.paginator,
+        'contexto': 'sesiones'
+    })
+
+#inventario
 
 def buscar_producto(request): 
     query = request.GET.get('q') 
@@ -222,11 +320,6 @@ def agregar_al_carrito(request, producto_id):
     
     return render(request, "inventario/home.html")
 
-    
-
-
-
-
 def eliminar_item(request, id):
     producto = get_object_or_404(CarritoItem, id=id)
     producto.eliminado = True
@@ -242,30 +335,32 @@ def generar_pdf(carrito_items):
     width, height = letter
 
     locale.setlocale(locale.LC_TIME, 'es_AR.UTF-8')
-
     fecha_actual = datetime.now()
-
     formato_local = fecha_actual.strftime("%A, %d de %B de %Y")
 
-    # Título del PDF
-    p.setFont("Helvetica-Bold", 16)
-    p.drawString(100, 750, "Lista de Productos del Carrito")
+    def agregar_encabezado():
+        """Función para agregar encabezado y columnas."""
+        p.setFont("Helvetica-Bold", 16)
+        p.drawString(100, 750, "Lista de Productos del Carrito")
+        p.setFont("Helvetica", 12)
+        p.drawString(100, 730, f"Fecha: {formato_local}")
+        p.setFont("Helvetica-Bold", 12)
+        p.drawString(100, 700, "Producto")
+        p.drawString(200, 700, "Cantidad")
+        p.drawString(300, 700, "Precio por bulto")
+        p.drawString(420, 700, "Proveedor")
+        p.drawString(530, 700, "Subtotal")
 
-    # Subtítulo con la fecha
-    p.setFont("Helvetica", 12)
-    p.drawString(100, 730, f"Fecha: {formato_local}")
+    agregar_encabezado()
 
-    # Encabezados de las columnas
-    p.setFont("Helvetica-Bold", 12)
-    p.drawString(100, 700, "Producto")
-    p.drawString(200, 700, "Cantidad")
-    p.drawString(300, 700, "Precio por bulto")
-    p.drawString(420, 700, "Proveedor")
-    p.drawString(530, 700, "Subtotal")
-
-    y = 680
+    y = 680 
     sub_total = 0
     for item in carrito_items:
+        if y < 50:
+            p.showPage()
+            agregar_encabezado()
+            y = 680
+
         p.setFont("Helvetica", 12)
         p.drawString(100, y, item.producto.nombre)
         p.drawString(200, y, str(item.cantidad))
@@ -274,11 +369,16 @@ def generar_pdf(carrito_items):
         p.drawString(420, y, f"{item.proveedor}")
         p.drawString(530, y, f"${item.sub_total}")
         y -= 20
-        sub_total += item.sub_total 
+        sub_total += item.sub_total
 
     total_a_pagar = sub_total
 
-    # Total a pagar
+    # Agregar total a pagar en la última página
+    if y < 70:
+        p.showPage()
+        agregar_encabezado()
+        y = 680
+
     p.setFont("Helvetica-Bold", 14)
     p.drawString(100, y - 40, f"Total a pagar: ${total_a_pagar}")
 
@@ -286,6 +386,7 @@ def generar_pdf(carrito_items):
     p.showPage()
     p.save()
     return pdf_path
+
 
 def pagar_productos(request):
     total = Decimal(0)

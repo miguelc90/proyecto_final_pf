@@ -16,6 +16,7 @@ class Marca(models.Model):
 class Proveedor(models.Model):
     nombre = models.CharField(max_length=50)
     descripcion = models.CharField(max_length=50, default="proveedor")
+    activo = models.BooleanField()
     imagen_proveedor = models.ImageField(upload_to='img/proveedores/', null=True, blank=True)
 
     def __str__(self):

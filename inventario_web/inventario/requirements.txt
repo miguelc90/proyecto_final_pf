@@ -3,3 +3,6 @@ django-admin-interface
 django-crispy-forms
 crispy-bootstrap4
 reportlab
+plotly
+django-plotly-dash
+json_script

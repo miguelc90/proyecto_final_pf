@@ -28,5 +28,12 @@ nav > ul > li > a {
 }
 
 .bg-contenido{
-    background-color: #007546;
+    background-color: hsl(158, 63%, 22%);
+}
+
+div img{
+    width: 100%;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    border-radius: 15px;
 }
