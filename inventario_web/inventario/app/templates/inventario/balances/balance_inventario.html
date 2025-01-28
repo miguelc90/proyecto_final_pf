@@ -1,0 +1,33 @@
+{% extends 'inventario/base.html' %}
+{% block contenido %}
+
+{% load static %}
+<link rel="stylesheet" href="{% static 'inventario/css/balances.css' %}">
+
+    <h1>Balances</h1>
+    <div id="grafico-contenedor" class="container">
+        <!-- Gráfico de barras -->
+        <div class="chart">
+            <h2>Stock por Categoría</h2>
+            <div id="loading" style="text-align: center;">Cargando gráficos...</div>
+            {{ graph_bar|safe }}
+        </div>
+        <hr>
+        <!-- Gráficos de torta -->
+        <div class="charts-row">
+            <div id="grafico" class="chart">
+                <h2>Stock por Proveedor</h2>
+                {{ graph_pie_proveedor|safe }}
+            </div>
+            <hr>
+            <div id="grafico" class="chart">
+                <h2>Stock por Marca</h2>
+                {{ graph_pie_marca|safe }}
+            </div>
+        </div>
+    </div>
+    {% block js %}
+        <script src="{% static 'inventario/js/home.js' %}"></script>
+    {% endblock %}
+{% endblock %}
+

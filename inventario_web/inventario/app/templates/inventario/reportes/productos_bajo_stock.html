@@ -1,0 +1,20 @@
+{% extends 'inventario/base.html' %}
+{% block contenido %}
+
+{% load static %}
+<link rel="stylesheet" href="{% static 'inventario/css/dash.css' %}">
+
+<div class="container mt-5">
+    <h1>Reporte de Productos con Baja Cantidad en Stock</h1>
+    <div id="grafico-contenedor">
+        <div id="loading" style="text-align: center;">Cargando gráfico...</div>
+        <div id="grafico">
+            {{ grafico|safe }}
+        </div>
+    </div>
+</div>
+{% block js %}
+    <script src="{% static 'inventario/js/home.js' %}"></script>
+{% endblock %}
+{% endblock %}
+

@@ -21,4 +21,7 @@ urlpatterns = [
     path('generar-pdf/', views.generar_pdf, name='generar_pdf'),
     path('descargar-pdf/', views.descargar_pdf, name='descargar_pdf'),
     path('pagar-productos/', views.pagar_productos, name='pagar_productos'),
+    path('productos-bajo-stock/', views.productos_bajo_stock, name='productos_bajo_stock'),
+    path('balances/', views.balance_inventario, name='balances'),
+    path('producto-mas-comprado/', views.producto_mas_comprado, name='producto_mas_comprado'),
 ]

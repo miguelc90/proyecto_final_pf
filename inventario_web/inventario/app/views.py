@@ -1,7 +1,9 @@
 
+import pandas as pd
+from django.db.models import Sum
 from decimal import Decimal
 import os, locale
-from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.http import Http404, HttpResponse, HttpResponseRedirect #revisar si no se usa
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
@@ -19,6 +21,8 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.decorators import login_required, permission_required
 import plotly.graph_objects as go
 from plotly.colors import sample_colorscale
+from django_plotly_dash import DjangoDash #revisar si no se usa
+import plotly.express as px
 
 
 # Create your views here.
@@ -52,13 +56,13 @@ def home(request):
         go.Bar(
             x=nombres_categorias,
             y=datos,
-            text=datos,  # Mostrar los valores directamente sobre las barras
+            text=datos,
             textposition='auto',
             marker=dict(
-                color=colores,  # Colores dinámicos de la escala 'Viridis'
-                line=dict(color='rgba(0, 0, 0, 0.8)', width=1.5)  # Bordes negros para destacar las barras
+                color=colores,
+                line=dict(color='rgba(0, 0, 0, 0.8)', width=1.5) 
             ),
-            hoverinfo='x+y',  # Información al pasar el mouse
+            hoverinfo='x+y',
         )
     ])
 
@@ -74,26 +78,26 @@ def home(request):
             titlefont=dict(size=18, color='rgba(58, 71, 80, 1.0)'),
             tickfont=dict(size=14, color='rgba(58, 71, 80, 0.8)'),
             showgrid=True,
-            gridcolor='rgba(200, 200, 200, 0.2)'  # Líneas de la grilla más suaves
+            gridcolor='rgba(200, 200, 200, 0.2)'
         ),
         yaxis=dict(
             title="Cantidad de Productos",
             titlefont=dict(size=18, color='rgba(58, 71, 80, 1.0)'),
             tickfont=dict(size=14, color='rgba(58, 71, 80, 0.8)'),
             showgrid=True,
-            gridcolor='rgba(200, 200, 200, 0.2)'  # Líneas de la grilla más suaves
+            gridcolor='rgba(200, 200, 200, 0.2)'
         ),
         legend=dict(
-            bgcolor='rgba(230, 230, 240, 0.5)',  # Fondo de la leyenda semitransparente
-            bordercolor='rgba(0, 0, 0, 0.3)',    # Borde de la leyenda
+            bgcolor='rgba(230, 230, 240, 0.5)',  
+            bordercolor='rgba(0, 0, 0, 0.3)',    
             borderwidth=1,
             font=dict(size=14, color='rgba(58, 71, 80, 1.0)')
         ),
         # Fondo del gráfico y área completa
-        plot_bgcolor='rgba(230, 230, 240, 1)',  # Fondo del gráfico (gris claro)
-        paper_bgcolor='rgba(245, 245, 250, 1)',  # Fondo del área completa (gris más claro)
-        margin=dict(t=70, l=50, r=50, b=70),  # Márgenes cómodos
-        showlegend=False,  # Mostrar leyenda
+        plot_bgcolor='rgba(230, 230, 240, 1)',
+        paper_bgcolor='rgba(245, 245, 250, 1)',
+        margin=dict(t=70, l=50, r=50, b=70),
+        showlegend=False,
     )
 
 
@@ -457,7 +461,122 @@ def descargar_pdf(request):
     except Transacciones.DoesNotExist:
         return HttpResponse('Transacción no encontrada', status=404)
 
+#Reportes
+def productos_bajo_stock(request, umbral=50):
+    # Consulta de productos con baja cantidad
+    productos_bajo_stock = Producto.objects.filter(cantidad_stock__lte=umbral, activo=True)
 
+    # Crear un DataFrame con los datos necesarios
+    data = {
+        'Producto': [producto.nombre for producto in productos_bajo_stock],
+        'Stock': [producto.cantidad_stock for producto in productos_bajo_stock]
+    }
+    df = pd.DataFrame(data)
 
+    # Crear el gráfico
+    fig = px.bar(
+        df,
+        x='Producto',
+        y='Stock',
+        labels={'Producto': 'Producto', 'Stock': 'Cantidad en Stock'},
+        title='Productos con menos de 50 unidades'
+    )
 
+    # Pasar los productos y el gráfico a la plantilla
+    return render(request, 'inventario/reportes/productos_bajo_stock.html', {
+        'productos_bajo_stock': productos_bajo_stock,
+        'grafico': fig.to_html(full_html=False) 
+    })
 
+#Balances
+def balance_inventario(request):
+    # datos gráfico de barras (por categorías)
+    productos = Producto.objects.filter(activo=True)
+    data_categorias = productos.values('categoria__nombre').annotate(
+        stock_total=Sum('cantidad_stock')
+    )
+    df_categorias = pd.DataFrame(data_categorias)
+
+    # Gráfico de barras (categorías)
+    fig_bar = px.bar(
+        df_categorias,
+        x='categoria__nombre',
+        y='stock_total',
+        labels={'categoria__nombre': 'Categoría', 'stock_total': 'Cantidad Total'},
+        title='Stock Total por Categoría'
+    )
+
+    # datos gráfico de torta (proveedores)
+    data_proveedores = productos.values('proveedor__nombre').annotate(
+        stock_total=Sum('cantidad_stock')
+    )
+    df_proveedores = pd.DataFrame(data_proveedores)
+
+    # Gráfico de torta (proveedores)
+    fig_pie_proveedor = px.pie(
+        df_proveedores,
+        names='proveedor__nombre',
+        values='stock_total',
+        title='Stock Total por Proveedor'
+    )
+
+    # datos gráfico de torta (marcas)
+    data_marcas = productos.values('marca__nombre').annotate(
+        stock_total=Sum('cantidad_stock')
+    )
+    df_marcas = pd.DataFrame(data_marcas)
+
+    # Gráfico de torta (marcas)
+    fig_pie_marca = px.pie(
+        df_marcas,
+        names='marca__nombre',
+        values='stock_total',
+        title='Stock Total por Marca'
+    )
+
+    # Renderizar la página con todos los gráficos
+    return render(request, 'inventario/balances/balance_inventario.html', {
+        'graph_bar': fig_bar.to_html(full_html=False),
+        'graph_pie_proveedor': fig_pie_proveedor.to_html(full_html=False),
+        'graph_pie_marca': fig_pie_marca.to_html(full_html=False)
+    })
+
+#Estadisticas
+def producto_mas_comprado(request):
+    productos_data = CarritoHistorial.objects.values('producto', 'producto__nombre', 'producto__proveedor__nombre') \
+        .annotate(total_encargados=Sum('cantidad')) \
+        .order_by('-total_encargados')[:10]  # Los 10 productos más encargados
+
+    # Convertir los datos a un DataFrame de pandas
+    df = pd.DataFrame(productos_data)
+
+    # Renombrar columnas para facilitar su uso en Plotly
+    df.rename(columns={
+        'producto__nombre': 'Producto',
+        'producto__proveedor__nombre': 'Proveedor',
+        'total_encargados': 'Cantidad Encargada'
+    }, inplace=True)
+
+    # Crear gráfico de líneas con Plotly
+    fig = px.line(
+        df,
+        x='Producto', 
+        y='Cantidad Encargada',  
+        markers=True,  
+        color='Proveedor', 
+        labels={'Producto': 'Producto', 'Cantidad Encargada': 'Cantidad Encargada'},
+        title='Productos Más Encargados a Proveedores',
+        line_shape='linear',
+        color_discrete_sequence=px.colors.qualitative.Set1
+    )
+    fig.update_layout(
+        xaxis_title='Producto',
+        yaxis_title='Cantidad Encargada',
+        template='plotly_white',
+        showlegend=True
+    )
+
+    # Renderizar el gráfico en la plantilla
+    return render(request, 'inventario/estadisticas/producto_mas_comprado.html', {
+        'grafico': fig.to_html(full_html=False)
+    })
