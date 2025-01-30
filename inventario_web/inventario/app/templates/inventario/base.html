@@ -13,15 +13,21 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm bg-dark navbar-dark justify-content-end">
+        <nav class="navbar navbar-expand-sm bg-danger navbar-dark justify-content-end">
             <ul class="navbar-nav">
                 {% if user.is_authenticated %}
                     <li class="navbar-nav-item">
-                        <a class="nav-link disabled text-primary" href=""><i class="bi bi-person"></i> Bienvenido/a: {{ user.username }}</a>
+                        <a class="nav-link disabled text-info" href=""><i class="bi bi-person"></i> Bienvenido/a: {{ user.username }}</a>
                     </li>
-                    <li class="navbar-nav-item">
-                        <a class="nav-link" href="{% url 'admin:index' %}"><i class="bi bi-shield-lock"></i> ir a administración</a>
-                    </li>
+                    {% if perms.sesiones.view %}
+                        <li class="navbar-nav-item">
+                            <a class="nav-link" href="{% url 'admin:index' %}"><i class="bi bi-shield-lock"></i> ir a administración</a>
+                        </li>
+                    {% else %}
+                        <li class="navbar-nav-item">
+                            <a class="nav-link" href="#" onclick="error_permiso()"><i class="bi bi-shield-lock"></i> ir a administración</a>
+                        </li>
+                    {% endif %}
                     <li class="navbar-nav-item">
                         <a class="nav-link" href="{% url 'salir' %}"><i class="bi bi-box-arrow-right"></i> cerrar sesion</a>
                     </li>
@@ -33,7 +39,7 @@
             </ul>
         </nav>
     </header>
-    <div class="container-fluid">
+    <div class="container-fluid bg-dark text-light">
         <div class="row">
             <div id="menu" class="col-2">
                 <div class="logo">
@@ -49,9 +55,15 @@
                     <li class="list-group-item">
                         <a class="nav-link" href="{% url 'agregar_producto' %}"><i class="bi bi-cart-plus"></i> Agregar Prod.</a>
                     </li>
-                    <li class="list-group-item">
-                        <a class="nav-link" href="{% url 'proveedores' %}"><i class="bi bi-truck"></i> Proveedores</a>
-                    </li>
+                    {% if perms.sesiones.view %}
+                        <li class="list-group-item">
+                            <a class="nav-link" href="{% url 'proveedores' %}"><i class="bi bi-truck"></i> Proveedores</a>
+                        </li>
+                    {% else %}
+                        <li class="list-group-item">
+                            <a class="nav-link" href="#" onclick="error_permiso()"><i class="bi bi-truck"></i> Proveedores</a>
+                        </li>
+                    {% endif %}
                     <li class="list-group-item">
                         <a class="nav-link" href="{% url 'productos_bajo_stock' %}"><i class="bi bi-journals"></i> Reportes</a>
                     </li>
@@ -62,7 +74,7 @@
                         <a class="nav-link" href="{% url 'producto_mas_comprado' %}"><i class="bi bi-graph-up"></i> Estadísticas</a>
                     </li>
                     <li class="list-group-item">
-                        <a class="nav-link" href="#"><i class="bi bi-bag"></i> Pedidos</a>
+                        <a class="nav-link" href="{% url 'pedidos_realizados' %}"><i class="bi bi-bag"></i> Pedidos</a>
                     </li>
                     {% if perms.sesiones.view %}
                         <li class="list-group-item">
@@ -74,7 +86,7 @@
                         </li>
                     {% endif %}
                     <li class="list-group-item">
-                        <a class="nav-link" href="#"><i class="bi bi-patch-question"></i> Soporte</a>
+                        <a class="nav-link" href="{% url 'soporte' %}"><i class="bi bi-patch-question"></i> Soporte</a>
                     </li>
                 </ul>
             </div>

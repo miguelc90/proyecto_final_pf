@@ -24,4 +24,6 @@ urlpatterns = [
     path('productos-bajo-stock/', views.productos_bajo_stock, name='productos_bajo_stock'),
     path('balances/', views.balance_inventario, name='balances'),
     path('producto-mas-comprado/', views.producto_mas_comprado, name='producto_mas_comprado'),
+    path('pedidos-realizados/', views.pedidos_realizados, name='pedidos_realizados'),
+    path('soporte/', views.soporte, name='soporte'),
 ]

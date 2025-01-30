@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from datetime import timedelta
+from django.utils import timezone
 import random
 
 #funciones
@@ -90,6 +92,11 @@ class Transacciones(models.Model):
         return f'Transacción {self.id} - Total: {self.total_final_a_pagar}'
     
 class CarritoHistorial(models.Model):
+    ESTADO_CHOICES = [
+        ('pendiente', 'Pendiente'),
+        ('entregado', 'Entregado'),
+    ]
+
     producto = models.ForeignKey(ProductoProveedor, on_delete=models.CASCADE)
     proveedor = models.ForeignKey(Proveedor, on_delete=models.CASCADE, null=True, blank=True)
     cantidad = models.PositiveIntegerField(default=1)
@@ -98,10 +105,28 @@ class CarritoHistorial(models.Model):
     procesado = models.BooleanField(default=False)
     eliminado = models.BooleanField(default=False)
     fecha_procesado = models.DateTimeField(auto_now_add=True)
+    fecha_de_entrega = models.DateTimeField(blank=True, null=True)
     transaccion = models.ForeignKey(Transacciones, on_delete=models.CASCADE, related_name='items')
+    estado = models.CharField(max_length=10, choices=ESTADO_CHOICES, default='pendiente')
+
+    def save(self, *args, **kwargs):
+        # Asegurar que fecha_procesado tenga valor antes de calcular fecha_de_entrega
+        if not self.fecha_procesado:
+            self.fecha_procesado = timezone.now()
+
+        if not self.fecha_de_entrega:
+            self.fecha_de_entrega = self.fecha_procesado + timedelta(days=1)
+
+        # Verificar si la fecha de entrega coincide con la fecha actual
+        if self.fecha_de_entrega.date() == timezone.now().date():
+            self.estado = 'entregado'
+        else:
+            self.estado = 'pendiente'
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
-        return f'{self.producto.nombre} - {self.cantidad}'
+        return f'{self.producto.nombre} - {self.cantidad} - {self.estado}'
 
     
 

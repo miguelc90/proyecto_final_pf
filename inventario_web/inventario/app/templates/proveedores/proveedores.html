@@ -2,11 +2,11 @@
 
 {% block contenido %}
 
-<h1>Aca van los proveedores</h1> 
+<h1>PROVEEDORES</h1> 
 
-<div class="d-flex flex-wrap justify-content-between">
+<div class="d-flex flex-wrap justify-content-between text-dark">
   {% for proveedor in proveedores %}
-  <div class="card border border-dark border-3" style="width: 20rem;">
+  <div class="card border border-info border-3" style="width: 20rem;">
     {% if proveedor.imagen_proveedor %} 
       <img src="{{ proveedor.imagen_proveedor.url }}" alt="{{ proveedor.nombre }}" class="card-img-top" style="height: 200px; object-fit: cover;"> 
     {% else %} 

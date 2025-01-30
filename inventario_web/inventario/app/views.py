@@ -11,6 +11,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import logout
 from django.core.files import File
 from datetime import datetime
+from django.utils import timezone
 
 from inventario import settings
 from .models import Producto, Transacciones, UserSession, Proveedor, ProductoProveedor, CarritoItem, CarritoHistorial
@@ -18,7 +19,7 @@ from .models import Categoria
 from .forms import ProductoForm
 from django.contrib import messages
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 import plotly.graph_objects as go
 from plotly.colors import sample_colorscale
 from django_plotly_dash import DjangoDash #revisar si no se usa
@@ -27,10 +28,16 @@ import plotly.express as px
 
 # Create your views here.
 
+#permisos
+def is_admin(user):
+    return user.is_superuser
+
 #inicio
 @login_required
 def home(request):
     #datos para las tarjetas
+    pedidos_realizados = CarritoHistorial.objects.count()
+    pedidos_pendientes = CarritoHistorial.objects.filter(estado='pendiente').count()
     producto_activo = Producto.objects.filter(activo=True).count()
     producto_inactivo = Producto.objects.filter(activo=False).count()
     proveedor_activo = Proveedor.objects.filter(activo=True).count()
@@ -110,6 +117,8 @@ def home(request):
         'proveedores_activos':proveedor_activo,
         'proveedores_inactivos':proveedor_inactivo,
         'productos_cargados':productos_cargados,
+        'pedidos_realizados':pedidos_realizados,
+        'pedidos_pendientes':pedidos_pendientes,
         'grafico':grafico_html,
     }
     return render(request, "inventario/home.html", data)
@@ -158,6 +167,7 @@ def logout_view(request):
     logout(request)
     return redirect('home')
 
+@user_passes_test(is_admin, login_url='/listado/')
 def sesion_usuario(request):
     sesiones = UserSession.objects.all().order_by('-login_time')
 
@@ -201,6 +211,7 @@ def agregar_producto(request):
             data['form'] = formulario
     return render(request, 'inventario/agregar.html', data)
 
+@login_required
 def modificar_producto(request, id):
 
     producto = get_object_or_404(Producto, id=id)
@@ -219,6 +230,8 @@ def modificar_producto(request, id):
 
     return render(request, 'inventario/modificar.html', data)
 
+@login_required
+@user_passes_test(is_admin, login_url='/listado/')
 def eliminar_producto(request, id):
     producto = get_object_or_404(Producto, id=id)
     producto.delete()
@@ -226,7 +239,8 @@ def eliminar_producto(request, id):
     return redirect(to='listado')
 
 #proveedores
-
+@login_required
+@user_passes_test(is_admin, login_url='/listado/')
 def lista_proveedores(request):
     proveedores = Proveedor.objects.all()
     data = {
@@ -234,6 +248,8 @@ def lista_proveedores(request):
     }
     return render(request, 'proveedores/proveedores.html', data)
 
+@login_required
+@user_passes_test(is_admin, login_url='/listado/')
 def proveedor_bebidas(request):
     bebidas = ProductoProveedor.objects.filter(proveedor__nombre="SRB Distribuidora").order_by('nombre')
     bebidas_paginadas = paginado_proveedores(request, bebidas)
@@ -244,6 +260,8 @@ def proveedor_bebidas(request):
     }
     return render(request, 'proveedores/proveedor_bebidas.html', data)
 
+@login_required
+@user_passes_test(is_admin, login_url='/listado/')
 def proveedor_alimentos(request):
     articulos = ProductoProveedor.objects.filter(proveedor__nombre="Grupo Almar").order_by('nombre')
     articulos_paginados = paginado_proveedores(request, articulos)
@@ -254,6 +272,8 @@ def proveedor_alimentos(request):
     }
     return render(request, 'proveedores/proveedor_alimentos.html', data)
 
+@login_required
+@user_passes_test(is_admin, login_url='/listado/')
 def proveedor_congelados(request):
     congelados = ProductoProveedor.objects.filter(proveedor__nombre="Congelados Food").order_by('nombre')
     congelados_paginados = paginado_proveedores(request, congelados)
@@ -266,6 +286,7 @@ def proveedor_congelados(request):
 
 #Carrito
 
+@user_passes_test(is_admin, login_url='/listado/')
 def ver_carrito(request):
     carrito_items = CarritoItem.objects.filter(procesado=False, eliminado=False)
 
@@ -296,7 +317,7 @@ def ver_carrito(request):
 
     return render(request, 'inventario/ver_carrito.html', {'carrito_items': carrito_items, 'total': total})
 
-
+@user_passes_test(is_admin, login_url='/listado/')
 def agregar_al_carrito(request, producto_id):
     producto = get_object_or_404(ProductoProveedor, id=producto_id)
 
@@ -324,6 +345,7 @@ def agregar_al_carrito(request, producto_id):
     
     return render(request, "inventario/home.html")
 
+@user_passes_test(is_admin, login_url='/listado/')
 def eliminar_item(request, id):
     producto = get_object_or_404(CarritoItem, id=id)
     producto.eliminado = True
@@ -331,7 +353,6 @@ def eliminar_item(request, id):
     producto.delete()
     messages.success(request, 'el producto se eliminó de la lista')
     return redirect(to='ver_carrito')
-
 
 def generar_pdf(carrito_items):
     pdf_path = os.path.join(settings.MEDIA_ROOT, 'transacciones_pdfs', 'carrito.pdf')
@@ -391,7 +412,7 @@ def generar_pdf(carrito_items):
     p.save()
     return pdf_path
 
-
+@user_passes_test(is_admin, login_url='/listado/')
 def pagar_productos(request):
     total = Decimal(0)
     carrito_items = CarritoItem.objects.filter(procesado=False, eliminado=False)
@@ -438,7 +459,7 @@ def pagar_productos(request):
     file_id = request.GET.get('file')
     return render(request, 'inventario/pagar_productos.html', {'carrito_items': carrito_items, 'total': total, 'file_id': file_id})
 
-
+@user_passes_test(is_admin, login_url='/listado/')
 def descargar_pdf(request):
     file_id = request.GET.get('file')
     if not file_id:
@@ -462,6 +483,7 @@ def descargar_pdf(request):
         return HttpResponse('Transacción no encontrada', status=404)
 
 #Reportes
+@login_required
 def productos_bajo_stock(request, umbral=50):
     # Consulta de productos con baja cantidad
     productos_bajo_stock = Producto.objects.filter(cantidad_stock__lte=umbral, activo=True)
@@ -489,6 +511,7 @@ def productos_bajo_stock(request, umbral=50):
     })
 
 #Balances
+@login_required
 def balance_inventario(request):
     # datos gráfico de barras (por categorías)
     productos = Producto.objects.filter(activo=True)
@@ -542,6 +565,7 @@ def balance_inventario(request):
     })
 
 #Estadisticas
+@login_required
 def producto_mas_comprado(request):
     productos_data = CarritoHistorial.objects.values('producto', 'producto__nombre', 'producto__proveedor__nombre') \
         .annotate(total_encargados=Sum('cantidad')) \
@@ -580,3 +604,29 @@ def producto_mas_comprado(request):
     return render(request, 'inventario/estadisticas/producto_mas_comprado.html', {
         'grafico': fig.to_html(full_html=False)
     })
+
+#Pedidos
+@login_required
+def pedidos_realizados(request):
+    #obtener los datos de los pedidos actualizados
+    pedidos = CarritoHistorial.objects.all()
+    for pedido in pedidos:
+        if pedido.fecha_de_entrega and pedido.fecha_de_entrega.date() == timezone.now().date():
+            pedido.estado = 'entregado'
+        else:
+            pedido.estado = 'pendiente'
+        pedido.save()
+
+    pedidos = CarritoHistorial.objects.filter(procesado=True).order_by('-fecha_procesado')
+    pedidos_paginados = paginado_proveedores(request, pedidos, 15)
+
+    return render(request, 'inventario/pedidos_realizados.html',{
+        'pedidos':pedidos_paginados,
+        'paginator':pedidos_paginados.paginator,
+        'contexto':'pedidos'
+    })
+
+#Soporte
+@login_required
+def soporte(request):
+    return render(request, 'inventario/soporte.html')

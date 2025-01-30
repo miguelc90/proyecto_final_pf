@@ -17,11 +17,20 @@
             </div>
             
             <div class="col-md-4 col-xl-3">
+                <div class="card bg-c-pink order-card">
+                    <div class="card-block">
+                        <h6 class="m-b-20">Productos Cargados</h6>
+                        <h2 class="text-right"><i class="fa fa-rocket f-left"></i><span>{{ productos_cargados }}</span></h2>
+                        <p class="m-b-0">Productos Pendientes<span class="f-right">0</span></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-xl-3">
                 <div class="card bg-c-green order-card">
                     <div class="card-block">
                         <h6 class="m-b-20">Pedidos Realizados</h6>
-                        <h2 class="text-right"><i class="fa fa-rocket f-left"></i><span>486</span></h2>
-                        <p class="m-b-0">Pedidos Pendientes<span class="f-right">351</span></p>
+                        <h2 class="text-right"><i class="fa fa-rocket f-left"></i><span>{{ pedidos_realizados }}</span></h2>
+                        <p class="m-b-0">Pedidos Pendientes<span class="f-right">{{ pedidos_pendientes }}</span></p>
                     </div>
                 </div>
             </div>
@@ -35,17 +44,6 @@
                     </div>
                 </div>
             </div>
-            
-            <div class="col-md-4 col-xl-3">
-                <div class="card bg-c-pink order-card">
-                    <div class="card-block">
-                        <h6 class="m-b-20">Productos Cargados</h6>
-                        <h2 class="text-right"><i class="fa fa-credit-card f-left"></i><span>{{ productos_cargados }}</span></h2>
-                        <p class="m-b-0">Productos Pendientes<span class="f-right">351</span></p>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <div id="grafico-contenedor">
             <div id="loading" style="text-align: center;">Cargando gráfico...</div>

@@ -6,10 +6,10 @@
 
     <h1>Balances</h1>
     <div id="grafico-contenedor" class="container">
+        <div id="loading">Cargando gráficos...</div>
         <!-- Gráfico de barras -->
         <div class="chart">
             <h2>Stock por Categoría</h2>
-            <div id="loading" style="text-align: center;">Cargando gráficos...</div>
             {{ graph_bar|safe }}
         </div>
         <hr>
