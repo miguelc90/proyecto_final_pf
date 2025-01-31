@@ -3,11 +3,38 @@
 }
 .centrar{
     margin-left: 13%;
-    margin-top: 10px;
+    margin-top: 20px;
     
+}
+
+h2{
+    text-align: center;
 }
 
 .formulario-personalizado { 
     height: 100vh;
     overflow-y: auto;
+    
+}
+
+.requiredField{
+    margin-left: 15%;
+}
+
+input[type=text], input[type=number], .select{
+    background-color: #212529;
+    color: #F8F9FA;
+    width: 70%;
+    align-items: center;
+    margin-left: 15%;
+    border-radius: 10px;
+    
+}
+
+.form-check{
+    margin-left: 15%;
+}
+
+.btn{
+    width: 100px;
 }

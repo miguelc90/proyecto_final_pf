@@ -6,16 +6,16 @@
 {% load static %}
 <link rel="stylesheet" href="{% static 'inventario/css/agregar.css' %}">
 
-<div class="row text-dark">
+<div class="row text-light">
   <div class="col-9 col-md-9 centrar">
     <div class="card">
-      <div class="card-body">
+      <div class="card-body bg-dark">
         <h2>NUEVO PRODUCTO</h2>
         <hr>
-        <form class="formulario-personalizado" action="" method="post" enctype="multipart/form-data">
+        <form class="formulario-personalizado bg-dark" action="" method="post" enctype="multipart/form-data">
           {% csrf_token %} 
           {{ form | crispy }}
-          <div class="d-flex justify-content-end">
+          <div class="d-flex justify-content-center">
             <input type="reset" value="Cancelar" class="btn btn-secondary" />
             &nbsp;
             <input type="submit" value="Guardar" class="btn btn-primary" />

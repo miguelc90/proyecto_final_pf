@@ -4,11 +4,18 @@
 {% load static %}
 <link rel="stylesheet" href="{% static 'inventario/css/agregar.css' %}">
 
-<h1>Aca va el pago</h1>
+<h1>RESUMEN DE COMPRA</h1>
 {% if file_id %}
-    <a href="{% url 'descargar_pdf' %}?file={{ file_id }}" class="btn btn-checkout btn-danger w-100">
-        Imprimir Pedido
-    </a>
+    <div style="border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; background-color: #f9f9f9; border-radius: 5px;">
+        <h2 style="color: #333;">¡Gracias por su pedido!</h2>
+        <p style="color: #666;">Su pedido ha sido recibido y llegará a la brevedad. A continuación, puede imprimir su pedido.</p>
+
+        <div class="d-flex justify-content-center">
+            <a href="{% url 'descargar_pdf' %}?file={{ file_id }}" class="btn btn-checkout btn-danger w-25">
+                Imprimir Pedido
+            </a>
+        </div>
+    </div>
 {% else %}
     <p>No hay PDF disponible para descargar.</p>
 {% endif %}

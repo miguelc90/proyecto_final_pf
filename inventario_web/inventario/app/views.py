@@ -24,6 +24,7 @@ import plotly.graph_objects as go
 from plotly.colors import sample_colorscale
 from django_plotly_dash import DjangoDash #revisar si no se usa
 import plotly.express as px
+from django.core.mail import send_mail
 
 
 # Create your views here.
@@ -630,3 +631,33 @@ def pedidos_realizados(request):
 @login_required
 def soporte(request):
     return render(request, 'inventario/soporte.html')
+
+def contacto(request):
+    if request.method == 'POST':
+        nombre = request.POST.get('nombre')
+        apellido = request.POST.get('apellido')
+        email = request.POST.get('email')
+        phone = request.POST.get('phone')
+        mensaje = request.POST.get('mensaje')
+        
+        # Crear el cuerpo del mensaje
+        cuerpo_mensaje = f"""
+        Nombre: {nombre}
+        Apellido: {apellido}
+        Email: {email}
+        Teléfono: {phone}
+        Mensaje: {mensaje}
+        """
+        
+        send_mail(
+            f'Mensaje de {nombre} {apellido}',
+            cuerpo_mensaje,
+            email,  # Este es el campo "from_email"
+            ['miguel.halconteach@gmail.com'],  # Este es el campo "recipient_list"
+            fail_silently=False
+        )
+        return redirect('gracias')
+    return render(request, 'inventario/soporte.html')
+
+def gracias(request):
+    return render(request, 'inventario/gracias.html')

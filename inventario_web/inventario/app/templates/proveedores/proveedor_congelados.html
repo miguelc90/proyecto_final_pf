@@ -16,8 +16,8 @@
     </div>
 </div>
 
-<table class="table table-striped table-hover table-responsive-sm table-warning">
-    <thead class="table-dark">
+<table class="table table-striped table-hover table-responsive-sm table-dark">
+    <thead class="table-primary">
         <th>Nombre</th>
         <th>Descripción</th>
         <th>F.Venc</th>
@@ -25,7 +25,7 @@
         <th>Unidades</th>
         <th>Precio Bulto</th>
         <th>Marca</th>
-        <th>Acción</th>
+        <th>Agregar</th>
     </thead>
     
     {% for congelado in congelados %}
@@ -44,8 +44,8 @@
                             {% csrf_token %}
                             <input type="hidden" name="producto" value="{{ congelado.id }}">
                             <input type="hidden" name="cantidad" value="1">
-                            <input class="form-check-input" type="checkbox" id="switch-{{ congelado.id }}" onchange="this.form.submit()">
-                            <label class="form-check-label" for="switch-{{ congelado.id }}">{{ congelado.nombre }}</label>
+                            <input class="form-check-input bg-info" type="checkbox" id="switch-{{ congelado.id }}" data-bs-toggle="tooltip" title="añadir el producto al carrito" onchange="this.form.submit()">
+                            <label class="form-check-label" for="switch-{{ congelado.id }}"></label>
                         </form>
                     </div>
                 </td>

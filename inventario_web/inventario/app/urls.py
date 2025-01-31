@@ -26,4 +26,6 @@ urlpatterns = [
     path('producto-mas-comprado/', views.producto_mas_comprado, name='producto_mas_comprado'),
     path('pedidos-realizados/', views.pedidos_realizados, name='pedidos_realizados'),
     path('soporte/', views.soporte, name='soporte'),
+    path('contacto/', views.contacto, name='contacto'),
+    path('gracias/', views.gracias, name='gracias'),
 ]

@@ -25,6 +25,9 @@ nav > ul > li > a {
     background-color: rgb(221, 214, 218);
 }
 
+h1{
+    text-align: center;
+}
 
 div img{
     width: 100%;
@@ -32,3 +35,4 @@ div img{
     margin-bottom: 5px;
     border-radius: 15px;
 }
+

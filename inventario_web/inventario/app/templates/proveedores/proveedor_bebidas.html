@@ -15,8 +15,8 @@
         </a>
     </div>
 </div>
-<table class="table table-striped table-hover table-responsive-sm table-warning mt-1">
-    <thead class="table-dark">
+<table class="table table-striped table-hover table-responsive-sm table-dark mt-1">
+    <thead class="table-primary">
         <th>Nombre</th>
         <th>Descripción</th>
         <th>F.Venc</th>
@@ -24,7 +24,7 @@
         <th>Unidades</th>
         <th>Precio Bulto</th>
         <th>Marca</th>
-        <th>Acción</th>
+        <th>Agregar</th>
     </thead>
     
     {% for bebida in bebidas %}
@@ -43,8 +43,8 @@
                             {% csrf_token %}
                             <input type="hidden" name="producto" value="{{ bebida.id }}">
                             <input type="hidden" name="cantidad" value="1">
-                            <input class="form-check-input" type="checkbox" id="switch-{{ bebida.id }}" onchange="this.form.submit()">
-                            <label class="form-check-label" for="switch-{{ bebida.id }}">{{ bebida.nombre }}</label>
+                            <input class="form-check-input bg-info" type="checkbox" id="switch-{{ bebida.id }}" data-bs-toggle="tooltip" title="añadir el producto al carrito" onchange="this.form.submit()">
+                            <label class="form-check-label" for="switch-{{ bebida.id }}"></label>
                         </form>
                     </div>
                 </td>

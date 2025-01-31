@@ -45,19 +45,20 @@
             </div>
     
             <div class="col-lg-7 contact-form__wrapper p-5 order-lg-1 text-dark">
-                <form action="#" class="contact-form form-validate" novalidate="novalidate">
+                <form action="{% url 'contacto' %}" method="post" class="contact-form form-validate" novalidate="novalidate">
+                    {% csrf_token %} 
                     <div class="row">
                         <div class="col-sm-6 mb-3">
                             <div class="form-group">
-                                <label class="required-field" for="firstName">Nombre</label>
-                                <input type="text" class="form-control" id="firstName" name="firstName" placeholder="nombre">
+                                <label class="required-field" for="nombre">Nombre</label>
+                                <input type="text" class="form-control" id="nombre" name="nombre" placeholder="nombre">
                             </div>
                         </div>
     
                         <div class="col-sm-6 mb-3">
                             <div class="form-group">
-                                <label for="lastName">Apellido</label>
-                                <input type="text" class="form-control" id="lastName" name="lastName" placeholder="apellido">
+                                <label for="apellido">Apellido</label>
+                                <input type="text" class="form-control" id="apellido" name="apellido" placeholder="apellido">
                             </div>
                         </div>
     
@@ -77,8 +78,8 @@
     
                         <div class="col-sm-12 mb-3">
                             <div class="form-group">
-                                <label class="required-field" for="message">¿En qué podemos ayudarte?</label>
-                                <textarea class="form-control" id="message" name="message" rows="4" placeholder="Describe tu consulta....."></textarea>
+                                <label class="required-field" for="mensaje">¿En qué podemos ayudarte?</label>
+                                <textarea class="form-control" id="mensaje" name="mensaje" rows="4" placeholder="Describe tu consulta....."></textarea>
                             </div>
                         </div>
     

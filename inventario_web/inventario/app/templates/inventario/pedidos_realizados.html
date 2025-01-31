@@ -2,16 +2,14 @@
 {% block contenido %}
 
 {% load static %}
-<h1>Pedidos Realizados</h1>
-<table class="table table-striped table-hover table-responsive-sm table-warning">
-    <thead>
-        <tr>
-            <th>Proveedor(es)</th>
-            <th>Productos Comprados</th>
-            <th>Fecha de Compra</th>
-            <th>Fecha de Entrega</th>
-            <th>Estado</th>
-        </tr>
+<h1>PEDIDOS REALIZADOS</h1>
+<table class="table table-striped table-hover table-responsive-sm table-dark">
+    <thead class="table-primary">
+        <th>Proveedor(es)</th>
+        <th>Productos Comprados</th>
+        <th>Fecha de Compra</th>
+        <th>Fecha de Entrega</th>
+        <th>Estado</th>
     </thead>
     <tbody>
         {% for pedido in pedidos %}
