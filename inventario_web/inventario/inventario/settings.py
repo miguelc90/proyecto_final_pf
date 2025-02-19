@@ -36,6 +36,7 @@ LOGOUT_REDIRECT_URL = '/'
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'admin_interface',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -49,8 +50,34 @@ INSTALLED_APPS = [
     'crispy_forms',
     'crispy_bootstrap4',
     'django_plotly_dash',
-
+    'background_task',
 ]
+
+# settings.py
+
+JAZZMIN_SETTINGS = {
+    #titulo
+    "site_brand": "SuperMarket-Admin",
+
+    #enlaces
+    "topmenu_links": [
+        # Enlace a la página de inicio
+        {
+            "name": "Home",
+            "url": "home",
+            "permissions": ["auth.view_user"]
+        },
+    ],
+
+    #copyright
+    "copyright": "HalconTech - Technology",
+
+}
+
+# JAZZMIN_UI_TWEAKS = {
+#     "theme": "darkly",
+# }
+
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
@@ -136,10 +163,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 import os
-STATIC_URL = '/static/' 
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'app/static/')] 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') 
-MEDIA_URL = '/media/' 
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'app/static/')]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type

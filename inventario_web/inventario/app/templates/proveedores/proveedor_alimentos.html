@@ -44,6 +44,7 @@
                             {% csrf_token %}
                             <input type="hidden" name="producto" value="{{ articulo.id }}">
                             <input type="hidden" name="cantidad" value="1">
+                            <input type="hidden" name="pagina" value="{{ request.GET.page|default:'1' }}">
                             <input class="form-check-input bg-info" type="checkbox" id="switch-{{ articulo.id }}" data-bs-toggle="tooltip" title="añadir el producto al carrito" onchange="this.form.submit()">
                             <label class="form-check-label" for="switch-{{ articulo.id }}"></label>
                         </form>

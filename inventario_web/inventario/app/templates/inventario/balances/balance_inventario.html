@@ -6,22 +6,19 @@
 
     <h1>BALANCES</h1>
     <div id="grafico-contenedor" class="container">
-        <div id="loading">Cargando gráficos...</div>
+        <div id="loading" class="text-light">Cargando gráficos...</div>
         <!-- Gráfico de barras -->
         <div class="chart">
-            <h2>Stock por Categoría</h2>
             {{ graph_bar|safe }}
         </div>
         <hr>
         <!-- Gráficos de torta -->
         <div class="charts-row">
             <div id="grafico" class="chart">
-                <h2>Stock por Proveedor</h2>
                 {{ graph_pie_proveedor|safe }}
             </div>
             <hr>
             <div id="grafico" class="chart">
-                <h2>Stock por Marca</h2>
                 {{ graph_pie_marca|safe }}
             </div>
         </div>

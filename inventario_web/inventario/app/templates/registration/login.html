@@ -4,15 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     {% load static %}
     <link rel="stylesheet" href="{% static 'inventario/css/login.css' %}">
-    <title>Document</title>
+    <title>SuperMarket-Login</title>
+    <link rel="shortcut icon" href="/media/img/menu/logo.png" type="image/x-icon">
 </head>
 <body>
   {% load crispy_forms_tags %}
+  <div class="container d-flex justify-content-center">
+    <div class="contenido">
+      <span class="titulo">INGRESE SUS CREDENCIALES</span><br>
+    </div>
+  </div>
   <form class="login" action="" method="post">
     {% csrf_token %}
-    {{ form | crispy}}
+    <div class="input-group mb-2">
+      <div class="input-group-prepend">
+        <span class="input-group-text"><i class="fas fa-user" data-bs-toggle="tooltip" title="usuario"></i></span>
+      </div>
+      {{ form.username|as_crispy_field }}
+    </div>
+    <div class="input-group mb-2">
+      <div class="input-group-prepend">
+        <span class="input-group-text"><i class="fas fa-lock" data-bs-toggle="tooltip" title="contraseña"></i></span>
+      </div>
+      {{ form.password|as_crispy_field }}
+    </div>
     <button type="submit" class="btn btn-success float-right">Ingresar</button>
   </form>
 </body>

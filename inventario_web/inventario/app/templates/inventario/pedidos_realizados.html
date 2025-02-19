@@ -7,6 +7,7 @@
     <thead class="table-primary">
         <th>Proveedor(es)</th>
         <th>Productos Comprados</th>
+        <th>Marca</th>
         <th>Fecha de Compra</th>
         <th>Fecha de Entrega</th>
         <th>Estado</th>
@@ -16,6 +17,7 @@
         <tr>
             <td>{{ pedido.proveedor.nombre }}</td>
             <td>{{ pedido.producto.nombre }} (x{{ pedido.cantidad }})</td>
+            <td>{{ pedido.producto.marca }}</td>
             <td>{{ pedido.fecha_procesado|date:"d/m/Y" }}</td>
             <td>{{ pedido.fecha_de_entrega|date:"d/m/Y" }}</td>
             <td>{{ pedido.estado }}</td>

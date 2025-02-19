@@ -6,3 +6,5 @@ reportlab
 plotly
 django-plotly-dash
 pandas
+django-jazzmin
+django-background-tasks

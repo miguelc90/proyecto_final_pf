@@ -1,0 +1,22 @@
+h1{
+    margin-top: 20px;
+    margin-bottom: 30px;
+}
+
+.contenido{
+    width: 70%;
+    height: 380px;
+    border: 1px solid #ccc; 
+    padding: 30px; 
+    margin-top: 120px;
+    margin-bottom: 20px; 
+    background-image: linear-gradient(to left top, #b7c3d4, #b5cad2, #bccecd, #c7d1cb, #d2d4ce); 
+    border-radius: 30px;
+}
+
+.contenido p{
+    color: black;
+    text-align: center;
+    font-size: large;
+    font-family: Arial, Helvetica, sans-serif;
+}

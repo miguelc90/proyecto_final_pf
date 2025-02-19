@@ -32,3 +32,6 @@ botonDisminuir.forEach(boton => {
         }
     }); 
 });
+
+
+

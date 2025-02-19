@@ -1,0 +1,51 @@
+
+h1{
+    margin-top: 50px;
+}
+
+.contenido{
+    width: 65%;
+    height: 265px;
+    border: 1px solid #ccc; 
+    padding: 30px; 
+    margin-top: 80px;
+    margin-bottom: 20px; 
+    background-image: linear-gradient(to left top, #b7c3d4, #b5cad2, #bccecd, #c7d1cb, #d2d4ce); 
+    border-radius: 15px;
+}
+
+h2{
+    color: #333;
+    text-align: center;
+}
+
+p{
+    color: #120101;
+}
+
+.btn{
+    margin-top: 40px;
+    border-radius: 10px;
+}
+
+@keyframes parpadeo {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+.no_pdf{
+    font-size: 2rem;
+    text-align: center;
+    color: #DC3545;
+    margin-top: 60px;
+    animation: parpadeo 1s infinite;
+}
+
+.no_pdf:hover{
+    font-size: 2rem;
+    text-align: center;
+    color: #DC3545;
+    margin-top: 60px;
+    animation: parpadeo 0s infinite;
+}

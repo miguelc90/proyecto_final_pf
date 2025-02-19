@@ -1,0 +1,37 @@
+
+.row{
+    height: 120vh;
+}
+
+.centrar{
+    margin-left: 13%;
+    margin-top: 20px;
+    
+}
+
+h2{
+    text-align: center;
+}
+
+.formulario-personalizado { 
+    height: 100vh;
+    overflow-y: auto;
+    
+}
+
+.aum_dism{
+    float: left;
+    min-width: 5rem;
+    max-width: 5rem;
+    background-color: #212529;
+    color: #F8F9FA;
+}
+
+.aum_dism:hover{
+    border-radius: 15px;
+}
+
+.btn-danger{
+    min-width: 5rem;
+    max-width: 5rem;
+}

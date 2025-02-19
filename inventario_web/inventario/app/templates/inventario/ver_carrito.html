@@ -5,9 +5,11 @@
 
 {% load static %}
 
-<link rel="stylesheet" href="{% static 'inventario/css/agregar.css' %}">
+<link rel="stylesheet" href="{% static 'inventario/css/ver_carrito.css' %}">
 
 {% load humanize %}
+
+
 
 <form method="post" action="{% url 'pagar_productos' %}">
     {% csrf_token %}
@@ -23,7 +25,7 @@
                             <div>
                                 <h5>{{ item.producto.nombre }} {{ item.producto.marca }}</h5>
                                 <p class="text-muted">{{ item.producto.descripcion }}</p>
-                                <input type="number" class="form-control w-50" min="1" name="cantidad_{{ item.producto.id }}" value="{{ item.cantidad }}" data-precio="{{ item.producto.precio_bulto|floatformat:2 }}" onchange="actualizarSubtotal(this)">
+                                <input type="number" class=" aum_dism form-control" min="1" max="50" name="cantidad_{{ item.producto.id }}" value="{{ item.cantidad }}" data-precio="{{ item.producto.precio_bulto|floatformat:2 }}" onchange="actualizarSubtotal(this)">
                             </div>
                         </div>
                         <div class="d-flex flex-column justify-content-between">
@@ -31,6 +33,8 @@
                             <a href="#" class="btn btn-sm btn-danger" onclick="eliminar_item_lista('{{ item.id }}')">Eliminar</a>
                         </div>
                     </div>
+
+
                     <hr>
                     {% endfor %}
             </div>

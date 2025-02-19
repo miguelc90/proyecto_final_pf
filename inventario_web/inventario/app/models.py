@@ -10,7 +10,7 @@ def generar_codigo_aleatorio():
 # Create your models here.
 
 class Marca(models.Model):
-    nombre = models.CharField(max_length=50)
+    nombre = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
         return self.nombre
@@ -110,15 +110,17 @@ class CarritoHistorial(models.Model):
     estado = models.CharField(max_length=10, choices=ESTADO_CHOICES, default='pendiente')
 
     def save(self, *args, **kwargs):
-        # Asegurar que fecha_procesado tenga valor antes de calcular fecha_de_entrega
         if not self.fecha_procesado:
             self.fecha_procesado = timezone.now()
 
         if not self.fecha_de_entrega:
             self.fecha_de_entrega = self.fecha_procesado + timedelta(days=1)
 
-        # Verificar si la fecha de entrega coincide con la fecha actual
-        if self.fecha_de_entrega.date() == timezone.now().date():
+        # Convertir fecha_de_entrega a la zona horaria local
+        fecha_entrega_local = timezone.localtime(self.fecha_de_entrega)
+
+        # Verificar si la fecha de entrega coincide con la fecha actual en la zona horaria local
+        if fecha_entrega_local.date() <= timezone.localtime(timezone.now()).date():
             self.estado = 'entregado'
         else:
             self.estado = 'pendiente'

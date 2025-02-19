@@ -21,7 +21,7 @@ h2{
     margin-left: 15%;
 }
 
-input[type=text], input[type=number], .select{
+input[type=text], input[type="number"], .select{
     background-color: #212529;
     color: #F8F9FA;
     width: 70%;
@@ -30,6 +30,7 @@ input[type=text], input[type=number], .select{
     border-radius: 10px;
     
 }
+
 
 .form-check{
     margin-left: 15%;
